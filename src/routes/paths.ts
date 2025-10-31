@@ -39,6 +39,17 @@ export const paths = {
     details: (id: string) => `/product/${id}`,
     demo: { details: `/product/${MOCK_ID}` },
   },
+  // Nuevas rutas de tienda
+  tienda: {
+    producto: {
+      root: '/producto',
+      details: (marca: string, modelo: string, id: string) => `/producto/${marca}/${modelo}/${id}`,
+    },
+    reparar: {
+      root: '/reparar',
+      details: (servicio: string, id: string) => `/reparar/${servicio}/${id}`,
+    },
+  },
   post: {
     root: `/post`,
     details: (title: string) => `/post/${kebabCase(title)}`,

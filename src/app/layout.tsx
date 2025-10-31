@@ -8,6 +8,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { CONFIG } from 'src/global-config';
 import { LocalizationProvider } from 'src/locales';
 import { detectLanguage } from 'src/locales/server';
+import { CartProvider } from 'src/store/cart-context';
 import { I18nProvider } from 'src/locales/i18n-provider';
 import { themeConfig, ThemeProvider, primary as primaryColor } from 'src/theme';
 
@@ -100,12 +101,14 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                     defaultMode={themeConfig.defaultMode}
                   >
                     <MotionLazy>
-                      <CheckoutProvider>
-                        <Snackbar />
-                        <ProgressBar />
-                        <SettingsDrawer defaultSettings={defaultSettings} />
-                        {children}
-                      </CheckoutProvider>
+                      <CartProvider>
+                        <CheckoutProvider>
+                          <Snackbar />
+                          <ProgressBar />
+                          <SettingsDrawer defaultSettings={defaultSettings} />
+                          {children}
+                        </CheckoutProvider>
+                      </CartProvider>
                     </MotionLazy>
                   </ThemeProvider>
                 </AppRouterCacheProvider>

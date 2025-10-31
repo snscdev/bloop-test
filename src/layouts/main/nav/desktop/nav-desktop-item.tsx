@@ -1,7 +1,7 @@
 import type { CSSObject } from '@mui/material/styles';
 import type { NavItemProps } from '../types';
 
-import { varAlpha, mergeClasses } from 'minimal-shared/utils';
+import { mergeClasses } from 'minimal-shared/utils';
 
 import { styled } from '@mui/material/styles';
 import ButtonBase from '@mui/material/ButtonBase';
@@ -58,34 +58,10 @@ const shouldForwardProp = (prop: string) => !['open', 'active', 'variant', 'sx']
 /**
  * @slot root
  */
-const ItemRoot = styled(ButtonBase, { shouldForwardProp })<StyledState>(({
-  active,
-  open,
-  theme,
-}) => {
-  const dotTransitions: Record<'in' | 'out', CSSObject> = {
-    in: { opacity: 0, scale: 0 },
-    out: { opacity: 1, scale: 1 },
-  };
-
-  const dotStyles: CSSObject = {
-    ...dotTransitions.in,
-    width: 6,
-    height: 6,
-    left: -12,
-    content: '""',
-    borderRadius: '50%',
-    position: 'absolute',
-    backgroundColor: varAlpha(theme.vars.palette.text.disabledChannel, 0.64),
-    transition: theme.transitions.create(['opacity', 'scale'], {
-      duration: theme.transitions.duration.shorter,
-    }),
-    ...(active && { ...dotTransitions.out, backgroundColor: theme.vars.palette.primary.main }),
-  };
-
+const ItemRoot = styled(ButtonBase, { shouldForwardProp })<StyledState>(({ active, theme }) => {
   const rootItemStyles: CSSObject = {
-    ...(open && { '&::before': { ...dotTransitions.out } }),
-    ...(active && { color: theme.vars.palette.primary.main }),
+    color: '#7F746A',
+    ...(active && { color: '#7F746A' }),
   };
 
   const subItemStyles: CSSObject = {
@@ -98,8 +74,6 @@ const ItemRoot = styled(ButtonBase, { shouldForwardProp })<StyledState>(({
     transition: theme.transitions.create(['color'], {
       duration: theme.transitions.duration.shorter,
     }),
-    '&::before': dotStyles,
-    '&:hover::before': { ...dotTransitions.out },
     variants: [
       { props: { variant: 'rootItem' }, style: rootItemStyles },
       { props: { variant: 'subItem' }, style: subItemStyles },
@@ -112,11 +86,14 @@ const ItemRoot = styled(ButtonBase, { shouldForwardProp })<StyledState>(({
  */
 const ItemTitle = styled('span', { shouldForwardProp })<StyledState>(({ theme }) => ({
   ...navItemStyles.title(theme),
-  ...theme.typography.body2,
-  fontWeight: theme.typography.fontWeightMedium,
+  fontFamily: '"DM Sans", sans-serif',
+  fontSize: '14px',
+  fontWeight: 500,
+  lineHeight: '20px',
+  letterSpacing: '-0.14px',
   variants: [
     { props: { variant: 'subItem' }, style: { fontSize: theme.typography.pxToRem(13) } },
-    { props: { active: true }, style: { fontWeight: theme.typography.fontWeightSemiBold } },
+    { props: { active: true }, style: { fontWeight: 600 } },
   ],
 }));
 

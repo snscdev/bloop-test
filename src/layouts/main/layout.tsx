@@ -5,24 +5,24 @@ import type { FooterProps } from './footer';
 import type { NavMainProps } from './nav/types';
 import type { MainSectionProps, HeaderSectionProps, LayoutSectionProps } from '../core';
 
-import { useBoolean } from 'minimal-shared/hooks';
-
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
 
-import { paths } from 'src/routes/paths';
 import { usePathname } from 'src/routes/hooks';
+
+import { useScrollSpy } from 'src/hooks/use-scroll-spy';
 
 import { Logo } from 'src/components/logo';
 
-import { NavMobile } from './nav/mobile';
 import { NavDesktop } from './nav/desktop';
 import { Footer, HomeFooter } from './footer';
-import { MenuButton } from '../components/menu-button';
+import { CartButton } from './nav/cart-button';
+import { UserMenuButton } from './nav/user-menu-button';
+import { MobileNavBar } from './nav/mobile/mobile-nav-bar';
+import { ShopMenuDropdown } from './nav/shop-menu-dropdown';
 import { navData as mainNavData } from '../nav-config-main';
-import { SignInButton } from '../components/sign-in-button';
-import { SettingsButton } from '../components/settings-button';
+import { ProductProgressBar } from './nav/product-progress-bar';
+import { ProductStickyNavbar } from './nav/product-sticky-navbar';
 import { MainSection, LayoutSection, HeaderSection } from '../core';
 
 // ----------------------------------------------------------------------
@@ -50,11 +50,18 @@ export function MainLayout({
 }: MainLayoutProps) {
   const pathname = usePathname();
 
-  const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
-
   const isHomePage = pathname === '/';
+  const isProductPage = pathname.startsWith('/producto/');
 
   const navData = slotProps?.nav?.data ?? mainNavData;
+
+  // Scroll spy for product pages
+  // Offset ajustado: sticky navbar (54px) + progress bar (48px) = 102px
+  const { activeSection, isScrolled } = useScrollSpy({
+    sectionIds: ['step-0', 'step-1', 'step-2', 'step-3', 'step-4', 'step-5'],
+    offset: 110,
+    throttle: 100,
+  });
 
   const renderHeader = () => {
     const headerSlots: HeaderSectionProps['slots'] = {
@@ -65,54 +72,37 @@ export function MainLayout({
       ),
       leftArea: (
         <>
-          {/** @slot Nav mobile */}
-          <MenuButton
-            onClick={onOpen}
-            sx={(theme) => ({
-              mr: 1,
-              ml: -1,
-              [theme.breakpoints.up(layoutQuery)]: { display: 'none' },
-            })}
-          />
-          <NavMobile data={navData} open={open} onClose={onClose} />
-
           {/** @slot Logo */}
-          <Logo />
+          <Logo isSingle={false} />
         </>
       ),
-      rightArea: (
+      centerArea: (
         <>
+          {/** @slot Shop menu dropdown - Desktop only */}
+          <ShopMenuDropdown
+            sx={(theme) => ({
+              display: 'none',
+              [theme.breakpoints.up(layoutQuery)]: { display: 'inline-flex' },
+            })}
+          />
           {/** @slot Nav desktop */}
           <NavDesktop
-            data={navData}
+            data={navData.filter((item) => item.title !== 'Comprar')}
             sx={(theme) => ({
               display: 'none',
               [theme.breakpoints.up(layoutQuery)]: { mr: 2.5, display: 'flex' },
             })}
           />
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
-            {/** @slot Settings button */}
-            <SettingsButton />
-
-            {/** @slot Sign in button */}
-            <SignInButton />
-
-            {/** @slot Purchase button */}
-            <Button
-              variant="contained"
-              rel="noopener noreferrer"
-              target="_blank"
-              href={paths.minimalStore}
-              sx={(theme) => ({
-                display: 'none',
-                [theme.breakpoints.up(layoutQuery)]: { display: 'inline-flex' },
-              })}
-            >
-              Purchase
-            </Button>
-          </Box>
         </>
+      ),
+      rightArea: (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
+          {/** @slot User menu button */}
+          <UserMenuButton />
+
+          {/** @slot Cart button */}
+          <CartButton />
+        </Box>
       ),
     };
 
@@ -121,8 +111,40 @@ export function MainLayout({
         layoutQuery={layoutQuery}
         {...slotProps?.header}
         slots={{ ...headerSlots, ...slotProps?.header?.slots }}
-        slotProps={slotProps?.header?.slotProps}
-        sx={slotProps?.header?.sx}
+        slotProps={{
+          ...slotProps?.header?.slotProps,
+          container: {
+            maxWidth: false,
+            disableGutters: true,
+            sx: {
+              maxWidth: 1280,
+              minHeight: 54,
+              height: 54,
+              borderRadius: '40px',
+              border: '1px solid #F4F3F2',
+              background: '#F8F8F8',
+              backdropFilter: 'blur(15.6px)',
+              px: 7,
+              mx: 'auto',
+              mt: 2,
+            },
+          },
+        }}
+        sx={{
+          background: 'transparent',
+          boxShadow: 'none',
+          '&::before': { display: 'none' },
+          '&::after': { display: 'none' },
+          display: { xs: 'none', md: 'block' },
+          // Ocultar navbar original cuando aparecen las sticky en páginas de producto
+          ...(isProductPage &&
+            isScrolled && {
+              opacity: 0,
+              pointerEvents: 'none',
+              transition: 'opacity 0.3s ease-in-out',
+            }),
+          ...slotProps?.header?.sx,
+        }}
       />
     );
   };
@@ -137,22 +159,33 @@ export function MainLayout({
   const renderMain = () => <MainSection {...slotProps?.main}>{children}</MainSection>;
 
   return (
-    <LayoutSection
-      /** **************************************
-       * @Header
-       *************************************** */
-      headerSection={renderHeader()}
-      /** **************************************
-       * @Footer
-       *************************************** */
-      footerSection={renderFooter()}
-      /** **************************************
-       * @Styles
-       *************************************** */
-      cssVars={cssVars}
-      sx={sx}
-    >
-      {renderMain()}
-    </LayoutSection>
+    <>
+      {/* Mobile NavBar - Solo visible en mobile */}
+      <MobileNavBar data={navData} layoutQuery={layoutQuery} />
+
+      {/* Product Sticky Navbar - Solo para páginas de producto */}
+      {isProductPage && <ProductStickyNavbar isVisible={isScrolled} />}
+
+      {/* Product Progress Bar - Solo para páginas de producto */}
+      {isProductPage && <ProductProgressBar activeSection={activeSection} isVisible={isScrolled} />}
+
+      <LayoutSection
+        /** **************************************
+         * @Header
+         *************************************** */
+        headerSection={renderHeader()}
+        /** **************************************
+         * @Footer
+         *************************************** */
+        footerSection={renderFooter()}
+        /** **************************************
+         * @Styles
+         *************************************** */
+        cssVars={cssVars}
+        sx={sx}
+      >
+        {renderMain()}
+      </LayoutSection>
+    </>
   );
 }
