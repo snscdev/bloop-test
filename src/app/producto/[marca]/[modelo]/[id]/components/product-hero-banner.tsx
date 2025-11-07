@@ -39,12 +39,13 @@ export function ProductHeroBanner({ productName, backgroundImage, variants, sx }
         sx={[
           {
             position: 'relative',
-            height: 309,
+            height: { xs: 129, md: 309 },
             width: '100%',
+            mt: { xs: 6, md: 0 },
             borderRadius: '40px',
             background: 'linear-gradient(172deg, #F9F9F9 41.52%, rgba(187, 187, 187, 0.56) 91.01%)',
             overflow: 'hidden',
-            mb: 6,
+            mb: { xs: 2, md: 6 },
             cursor: 'pointer',
             '&:hover .background-image': {
               transform: 'translate(-50%, -50%) scale(1.05)',
@@ -62,12 +63,12 @@ export function ProductHeroBanner({ productName, backgroundImage, variants, sx }
             className="background-image"
             sx={{
               position: 'absolute',
-              width: '80%',
+              width: { xs: '100%', md: '80%' },
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
               height: '100%',
-              objectFit: 'cover',
+              objectFit: { xs: 'cover', md: 'cover' },
               zIndex: 0,
               transition: 'transform 0.4s ease-in-out',
             }}

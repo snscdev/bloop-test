@@ -26,6 +26,9 @@ export function useScrollSpy({
     setScrollY(currentScrollY);
     setIsScrolled(currentScrollY > 100);
 
+    // Punto de referencia: justo después del offset (navbar + progress bar)
+    const referencePoint = offset;
+
     // Find which section is currently in view
     const sections = sectionIds
       .map((id) => {
@@ -33,51 +36,51 @@ export function useScrollSpy({
         if (!element) return null;
 
         const rect = element.getBoundingClientRect();
-        const elementTop = rect.top + currentScrollY;
-        const elementBottom = elementTop + rect.height;
 
         return {
           id,
-          top: elementTop,
-          bottom: elementBottom,
-          isInView: rect.top <= offset && rect.bottom >= offset,
+          rect,
+          // Una sección está "activa" si su top está antes del punto de referencia
+          // y su bottom está después del punto de referencia (la sección cruza el punto)
+          isActive: rect.top <= referencePoint && rect.bottom > referencePoint,
+          // Distancia del top de la sección al punto de referencia
+          distanceFromTop: Math.abs(rect.top - referencePoint),
         };
       })
       .filter(Boolean);
 
-    // Find the section that is most visible
-    const visibleSection = sections.find((section) => section && section.isInView);
+    if (sections.length === 0) return;
 
-    if (visibleSection) {
-      setActiveSection(visibleSection.id);
-    } else {
-      // If no section is in the offset zone, find the closest one
-      const closestSection = sections.reduce((closest, section) => {
+    // Buscar la sección que cruza el punto de referencia
+    let currentActive = sections.find((section) => section && section.isActive);
+
+    // Si ninguna sección cruza el punto exacto, tomar la más cercana
+    if (!currentActive) {
+      currentActive = sections.reduce((closest, section) => {
         if (!section || !closest) return section || closest;
-
-        const sectionDistance = Math.abs(section.top - currentScrollY);
-        const closestDistance = Math.abs(closest.top - currentScrollY);
-
-        return sectionDistance < closestDistance ? section : closest;
+        return section.distanceFromTop < closest.distanceFromTop ? section : closest;
       }, sections[0]);
+    }
 
-      if (closestSection) {
-        setActiveSection(closestSection.id);
-      }
+    if (currentActive) {
+      setActiveSection(currentActive.id);
     }
   }, [sectionIds, offset]);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let rafId: number | null = null;
 
     const throttledHandleScroll = () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      // Cancelar cualquier animación pendiente
+      if (rafId) {
+        cancelAnimationFrame(rafId);
       }
 
-      timeoutId = setTimeout(() => {
+      // Usar requestAnimationFrame para mejor rendimiento
+      rafId = requestAnimationFrame(() => {
         handleScroll();
-      }, throttle);
+        rafId = null;
+      });
     };
 
     // Initial check
@@ -87,11 +90,11 @@ export function useScrollSpy({
 
     return () => {
       window.removeEventListener('scroll', throttledHandleScroll);
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
       }
     };
-  }, [handleScroll, throttle]);
+  }, [handleScroll]);
 
   return {
     activeSection,

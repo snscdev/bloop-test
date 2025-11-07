@@ -15,6 +15,8 @@ import Typography from '@mui/material/Typography';
 
 import { useRouter } from 'src/routes/hooks';
 
+import useAuthStore from 'src/store/AuthStore';
+
 import { Iconify } from 'src/components/iconify';
 
 import { useAuthContext } from 'src/auth/hooks';
@@ -28,6 +30,7 @@ type Props = {
 export function UserMenuButton({ sx }: Props) {
   const router = useRouter();
   const { user, authenticated } = useAuthContext();
+  const { logout } = useAuthStore();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -53,8 +56,26 @@ export function UserMenuButton({ sx }: Props) {
   };
 
   const handleLogout = () => {
-    // TODO: Implementar logout
-    handleClose();
+    try {
+      // Cerrar el popover
+      handleClose();
+
+      // Llamar al logout del AuthStore (limpia todo el storage)
+      logout({ removeStorage: true });
+
+      // Redirigir al home y forzar recarga para limpiar el estado del AuthContext
+      router.push('/');
+
+      // Forzar recarga después de un pequeño delay para asegurar la navegación
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      // En caso de error, redirigir igual
+      router.push('/');
+      window.location.reload();
+    }
   };
 
   const open = Boolean(anchorEl);

@@ -25,7 +25,7 @@ export type ConfigValue = {
     messagingSenderId: string;
   };
   amplify: { userPoolId: string; userPoolWebClientId: string; region: string };
-  auth0: { clientId: string; domain: string; callbackUrl: string };
+  auth0: { clientId: string; domain: string; callbackUrl: string; audience: string };
   supabase: { url: string; key: string };
 };
 
@@ -73,6 +73,7 @@ export const CONFIG: ConfigValue = {
     clientId: process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID ?? '',
     domain: process.env.NEXT_PUBLIC_AUTH0_DOMAIN ?? '',
     callbackUrl: process.env.NEXT_PUBLIC_AUTH0_CALLBACK_URL ?? '',
+    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE ?? '',
   },
   /**
    * Supabase

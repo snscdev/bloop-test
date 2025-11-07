@@ -47,7 +47,7 @@ export function AuthProvider({ children }: Props) {
     <Auth0Provider
       domain={domain}
       clientId={clientId}
-      authorizationParams={{ redirect_uri: callbackUrlWithDomain, audience: 'michin-api' }}
+      authorizationParams={{ redirect_uri: callbackUrlWithDomain, audience: CONFIG.auth0.audience }}
       onRedirectCallback={onRedirectCallback}
       cacheLocation="localstorage"
     >
@@ -60,25 +60,35 @@ export function AuthProvider({ children }: Props) {
 
 // Container cuando Auth0 NO está disponible (solo autenticación local)
 function LocalAuthProviderContainer({ children }: Props) {
-  const { userpassAuthenticated } = useAuthStore();
+  const { userpassAuthenticated, _hasHydrated } = useAuthStore();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Esperar a que Zustand termine de hidratar desde localStorage
+  useEffect(() => {
+    if (_hasHydrated) {
+      setIsHydrated(true);
+    }
+  }, [_hasHydrated]);
 
   useEffect(() => {
-    if (userpassAuthenticated) {
+    if (isHydrated && userpassAuthenticated) {
       const token = getStorage(KeysLocalStorage.keyAccessToken) || '';
       setStorage(KeysLocalStorage.keyAccessToken, token);
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-    } else {
+    } else if (isHydrated && !userpassAuthenticated) {
       setStorage(KeysLocalStorage.keyAccessToken, '');
       delete axios.defaults.headers.common.Authorization;
     }
-  }, [userpassAuthenticated]);
+  }, [userpassAuthenticated, isHydrated]);
 
-  const status = userpassAuthenticated ? 'authenticated' : 'unauthenticated';
+  // Mostrar loading mientras se hidrata
+  const checkAuthenticated = userpassAuthenticated ? 'authenticated' : 'unauthenticated';
+  const status = isHydrated ? checkAuthenticated : 'loading';
 
   const memoizedValue = useMemo(
     () => ({
       user: null,
-      loading: false,
+      loading: status === 'loading',
       authenticated: status === 'authenticated',
       unauthenticated: status === 'unauthenticated',
     }),
@@ -92,9 +102,17 @@ function LocalAuthProviderContainer({ children }: Props) {
 function AuthProviderContainer({ children }: Props) {
   const { user, isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
 
-  const { userpassAuthenticated } = useAuthStore();
+  const { userpassAuthenticated, _hasHydrated } = useAuthStore();
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Esperar a que Zustand termine de hidratar desde localStorage
+  useEffect(() => {
+    if (_hasHydrated) {
+      setIsHydrated(true);
+    }
+  }, [_hasHydrated]);
 
   const getAccessToken = useCallback(async () => {
     try {
@@ -104,7 +122,7 @@ function AuthProviderContainer({ children }: Props) {
         if (isAuthenticated) {
           token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: 'michin-api',
+              audience: CONFIG.auth0.audience,
             },
           });
         } else {
@@ -125,15 +143,19 @@ function AuthProviderContainer({ children }: Props) {
   }, [getAccessTokenSilently, isAuthenticated, userpassAuthenticated]);
 
   useEffect(() => {
-    getAccessToken();
-  }, [getAccessToken]);
+    // Solo ejecutar getAccessToken cuando Zustand haya hidratado
+    if (isHydrated) {
+      getAccessToken();
+    }
+  }, [getAccessToken, isHydrated]);
 
   // ----------------------------------------------------------------------
 
   const checkAuthenticated =
     isAuthenticated || userpassAuthenticated ? 'authenticated' : 'unauthenticated';
 
-  const status = isLoading ? 'loading' : checkAuthenticated;
+  // Combinar loading de Auth0 + loading de hidratación de Zustand
+  const status = isLoading || !isHydrated ? 'loading' : checkAuthenticated;
 
   const memoizedValue = useMemo(
     () => ({

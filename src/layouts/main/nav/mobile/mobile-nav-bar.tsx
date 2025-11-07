@@ -75,12 +75,12 @@ export function MobileNavBar({ data, layoutQuery = 'md' }: MobileNavBarProps) {
           <Box
             sx={{
               position: open ? 'static' : 'absolute',
-              left: open ? 'auto' : '50%',
+              left: open ? 'auto' : '46%',
               transform: open ? 'none' : 'translateX(-50%)',
               transition: 'all 0.3s ease-in-out',
             }}
           >
-            <Logo isSingle={false} sx={{ width: '80%' }} />
+            <Logo isSingle={false} sx={{ width: '65%' }} />
           </Box>
 
           {/* Right: User + Cart buttons or Close button */}

@@ -9,6 +9,8 @@ import { merge } from 'es-toolkit';
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 
+import { usePathname } from 'src/routes/hooks';
+
 import { CONFIG } from 'src/global-config';
 
 import { Logo } from 'src/components/logo';
@@ -36,6 +38,8 @@ export function AuthCenteredLayout({
   slotProps,
   layoutQuery = 'md',
 }: AuthCenteredLayoutProps) {
+  const pathname = usePathname();
+
   const renderHeader = () => {
     const headerSlotProps: HeaderSectionProps['slotProps'] = { container: { maxWidth: false } };
 
@@ -105,6 +109,8 @@ export function AuthCenteredLayout({
     </MainSection>
   );
 
+  const width = pathname.includes('/auth/sign-up') ? '800px' : '420px';
+
   return (
     <LayoutSection
       /** **************************************
@@ -118,7 +124,7 @@ export function AuthCenteredLayout({
       /** **************************************
        * @Styles
        *************************************** */
-      cssVars={{ '--layout-auth-content-width': '420px', ...cssVars }}
+      cssVars={{ '--layout-auth-content-width': width, ...cssVars }}
       sx={[
         (theme) => ({
           position: 'relative',

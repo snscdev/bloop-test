@@ -7,6 +7,8 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
+import { useProductCheckoutStore } from 'src/store/product-checkout-store';
+
 // ----------------------------------------------------------------------
 
 type Step = {
@@ -34,18 +36,58 @@ export function ProductProgressBar({ activeSection, isVisible, sx }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  // Obtener las selecciones del usuario del store
+  const { selectedOptions } = useProductCheckoutStore();
+
+  // Determinar si todos los pasos requeridos están completos
+  const allRequiredSelected =
+    !!selectedOptions.conditionId &&
+    !!selectedOptions.modelId &&
+    !!selectedOptions.storageId &&
+    !!selectedOptions.colorId;
+
+  // Encontrar el índice del paso activo por scroll
   const activeStepIndex = STEPS.findIndex((step) => step.id === activeSection);
-  const progress = activeStepIndex >= 0 ? ((activeStepIndex + 1) / STEPS.length) * 100 : 0;
+
+  // Determinar hasta dónde puede avanzar la barra basándose en las selecciones
+  // La regla: puedes ver el paso siguiente al último que completaste
+  let maxAllowedStep = 0; // Por defecto, siempre puedes ver Estado (step-0)
+
+  if (allRequiredSelected) {
+    // Si tiene todo seleccionado, puede llegar hasta Pago (step-5, índice 5)
+    maxAllowedStep = 5;
+  } else if (selectedOptions.colorId) {
+    // Si seleccionó color, puede ver hasta Accesorios (step-4, índice 4)
+    maxAllowedStep = 4;
+  } else if (selectedOptions.storageId) {
+    // Si seleccionó almacenamiento, puede ver hasta Color (step-3, índice 3)
+    maxAllowedStep = 3;
+  } else if (selectedOptions.modelId) {
+    // Si seleccionó modelo, puede ver hasta Almacenamiento (step-2, índice 2)
+    maxAllowedStep = 2;
+  } else if (selectedOptions.conditionId) {
+    // Si seleccionó estado, puede ver hasta Modelo (step-1, índice 1)
+    maxAllowedStep = 1;
+  }
+
+  // La barra avanza según el scroll, pero no puede ir más allá de lo permitido por las selecciones
+  const effectiveStepIndex = Math.min(activeStepIndex, maxAllowedStep);
+  const progress = effectiveStepIndex >= 0 ? ((effectiveStepIndex + 1) / STEPS.length) * 100 : 0;
 
   const handleStepClick = (stepId: string) => {
     const element = document.getElementById(stepId);
     if (element) {
-      // Account for sticky navbar (54px) + progress bar (48px) = 102px
-      const offsetTop = element.offsetTop - (isMobile ? 102 : 110);
+      // Account for sticky navbar (54px) + progress bar (48px) + margen (20px) = 122px
+      const offsetTop = element.offsetTop - 122;
+
+      // Realizar el scroll suave
       window.scrollTo({
         top: offsetTop,
         behavior: 'smooth',
       });
+
+      // El scroll suave toma tiempo, pero el hook useScrollSpy
+      // debería detectar el cambio automáticamente a medida que scrollea
     }
   };
 
@@ -89,7 +131,8 @@ export function ProductProgressBar({ activeSection, isVisible, sx }: Props) {
         >
           {STEPS.map((step, index) => {
             const isActive = step.id === activeSection;
-            const isPassed = activeStepIndex > index;
+            // Un paso está "passed" si está completado Y el progreso ya pasó por ahí
+            const isPassed = index < effectiveStepIndex;
 
             return (
               <Box

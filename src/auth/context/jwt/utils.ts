@@ -72,7 +72,9 @@ export function tokenExpired(exp: number) {
 export async function setSession(accessToken: string | null) {
   try {
     if (accessToken) {
+      // Guardar en ambos storages para mantener sincronización
       sessionStorage.setItem(JWT_STORAGE_KEY, accessToken);
+      localStorage.setItem('access_token', accessToken);
 
       axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
@@ -84,7 +86,9 @@ export async function setSession(accessToken: string | null) {
         throw new Error('Invalid access token!');
       }
     } else {
+      // Limpiar ambos storages
       sessionStorage.removeItem(JWT_STORAGE_KEY);
+      localStorage.removeItem('access_token');
       delete axios.defaults.headers.common.Authorization;
     }
   } catch (error) {

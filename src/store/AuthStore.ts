@@ -37,6 +37,7 @@ interface AuthState {
   accessToken: string | null;
   ssoValue: string | null;
   emailRegistered: string | null;
+  _hasHydrated: boolean;
   setAccessToken: (accessToken: string) => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (dataSignup: DataSignup) => Promise<void>;
@@ -47,6 +48,7 @@ interface AuthState {
   fetchUser: () => Promise<void>;
   validateEmail: (email: string) => Promise<ValidateEmailResponse | any>;
   setPostLoginRedirectPath: (path: string) => void;
+  clearPostLoginRedirectPath: () => void;
   setEmailRegistered: (email: string) => void;
 }
 
@@ -61,6 +63,7 @@ const useAuthStore = create<AuthState>()(
       accessToken: null,
       ssoValue: null,
       emailRegistered: null,
+      _hasHydrated: false,
       setEmailRegistered: (email: string) => {
         set({ emailRegistered: email.toLowerCase() });
       },
@@ -72,12 +75,30 @@ const useAuthStore = create<AuthState>()(
             email,
             password,
           });
-          setStorage(KeysLocalStorage.keyAccessToken, response.data.access_token);
+
+          const accessToken = response.data.access_token;
+
+          // Guardar en localStorage para persistencia
+          setStorage(KeysLocalStorage.keyAccessToken, accessToken);
+
+          // También guardar en sessionStorage para compatibilidad con JwtAuthProvider
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('jwt_access_token', accessToken);
+          }
+
           set({
             userpassAuthenticated: true,
-            accessToken: response.data.access_token,
+            accessToken,
             loading: false,
           });
+
+          // Obtener datos del usuario después del login
+          try {
+            const userResponse = await axiosInstance.get(endpoints.auth.profile);
+            set({ user: userResponse.data });
+          } catch (userError) {
+            console.error('Error al obtener usuario:', userError);
+          }
         } catch (error) {
           console.error('Error al iniciar sesión:', error);
           set({ loading: false });
@@ -108,12 +129,30 @@ const useAuthStore = create<AuthState>()(
           set({ loading: true });
           const axiosInstance = createAxiosInstance();
           const response = await axiosInstance.post(endpoints.auth.signup, dataSignup);
-          setStorage(KeysLocalStorage.keyAccessToken, response.data.access_token);
+
+          const accessToken = response.data.access_token;
+
+          // Guardar en localStorage para persistencia
+          setStorage(KeysLocalStorage.keyAccessToken, accessToken);
+
+          // También guardar en sessionStorage para compatibilidad con JwtAuthProvider
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('jwt_access_token', accessToken);
+          }
+
           set({
             userpassAuthenticated: true,
-            accessToken: response.data.access_token,
+            accessToken,
             loading: false,
           });
+
+          // Obtener datos del usuario después del registro
+          try {
+            const userResponse = await axiosInstance.get(endpoints.auth.profile);
+            set({ user: userResponse.data });
+          } catch (userError) {
+            console.error('Error al obtener usuario:', userError);
+          }
         } catch (error) {
           console.error('Error al registrar:', error);
           set({ loading: false });
@@ -121,9 +160,24 @@ const useAuthStore = create<AuthState>()(
         }
       },
       logout: (params: LogoutParams = { removeStorage: true }) => {
-        set({ userpassAuthenticated: false, userAuth0: null, accessToken: null, user: null });
+        // Limpiar estado del store
+        set({
+          userpassAuthenticated: false,
+          userAuth0: null,
+          accessToken: null,
+          user: null,
+          postLoginRedirectPath: null,
+        });
+
         if (params.removeStorage) {
+          // Limpiar localStorage
           removeAllStorage();
+
+          // Limpiar sessionStorage también
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('jwt_access_token');
+            sessionStorage.clear();
+          }
         }
       },
       sendEmailChangePassword: async (email) => {
@@ -154,6 +208,9 @@ const useAuthStore = create<AuthState>()(
       },
       setPostLoginRedirectPath: (path: string) => {
         set({ postLoginRedirectPath: path });
+      },
+      clearPostLoginRedirectPath: () => {
+        set({ postLoginRedirectPath: null });
       },
       setAccessToken: (accessToken: string) => {
         set({ accessToken });
@@ -194,6 +251,11 @@ const useAuthStore = create<AuthState>()(
           ssoValue: state.ssoValue,
           emailRegistered: state.emailRegistered,
         }) as AuthState,
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state._hasHydrated = true;
+        }
+      },
     }
   )
 );

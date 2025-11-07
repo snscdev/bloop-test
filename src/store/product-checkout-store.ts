@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import * as productService from 'src/services/product-service';
+
 // Types
 
 // Variante del banner (mini, pro, pro-max)
@@ -22,6 +24,10 @@ export type StorageOption = {
   id: string;
   name: string; // "128GB"
   price: number;
+  icon?: string; // SVG data-uri o URL
+  iconType?: string; // "data-uri" u otro tipo
+  isDefault?: boolean;
+  isAvailable?: boolean;
 };
 
 // Modelo con detalles específicos
@@ -35,13 +41,19 @@ export type ProductModel = {
     camera: string; // "Triple cámara 48MP"
     otherDetail?: string; // Detalle adicional opcional
   };
+  gallery?: string[]; // Imágenes para el carrusel de checkout
+  isDefault?: boolean;
+  isAvailable?: boolean;
 };
 
-// Color con código hex
+// Color con código hex y gradiente
 export type ColorOption = {
   id: string;
   name: string;
-  colorCode: string; // "#1E3A8A"
+  colorCode: string; // "#1E3A8A" o gradient del backend: "linear-gradient(...)"
+  gradient?: string; // CSS gradient string (opcional, se usa colorCode si no existe)
+  isDefault?: boolean;
+  isAvailable?: boolean;
 };
 
 // Accesorio con colores disponibles
@@ -51,6 +63,7 @@ export type Accessory = {
   image: string;
   price: number;
   availableColors: ColorOption[]; // Colores disponibles para el accesorio
+  gallery: string[]; // Array de URLs de imágenes para el carrusel
 };
 
 // Estado de carga para cada sección
@@ -124,7 +137,7 @@ type ProductCheckoutState = {
 };
 
 // ============================================================================
-// Mock Backend Functions - Simular llamadas al backend
+// Backend Functions - Llamadas reales al API
 // ============================================================================
 
 // 1. Cuando selecciona ESTADO → Carga MODELOS disponibles
@@ -132,131 +145,8 @@ const fetchModelsForCondition = async (
   productId: string,
   conditionId: string
 ): Promise<ProductModel[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-
-  // iPhone
-  if (productId === 'iphone-13-pro-max-001') {
-    if (conditionId === 'new') {
-      return [
-        {
-          id: 'model-13',
-          name: 'iPhone 13',
-          image: '/assets/images/mock/product-3.webp',
-          price: 0,
-          details: {
-            screenSize: '6.1 pulgadas',
-            camera: 'Dual cámara 12MP',
-            otherDetail: 'Chip A15 Bionic',
-          },
-        },
-        {
-          id: 'model-13-pro',
-          name: 'iPhone 13 Pro',
-          image: '/assets/images/mock/product-2.webp',
-          price: 0,
-          details: {
-            screenSize: '6.1 pulgadas ProMotion',
-            camera: 'Triple cámara 12MP Pro',
-            otherDetail: 'Chip A15 Bionic con GPU de 5 núcleos',
-          },
-        },
-        {
-          id: 'model-13-pro-max',
-          name: 'iPhone 13 Pro Max',
-          image: '/assets/images/mock/product-1.webp',
-          price: 0,
-          details: {
-            screenSize: '6.7 pulgadas ProMotion',
-            camera: 'Triple cámara 12MP Pro',
-            otherDetail: 'Mayor duración de batería',
-          },
-        },
-      ];
-    }
-    // Refurbished - solo algunos modelos disponibles
-    return [
-      {
-        id: 'model-13-pro',
-        name: 'iPhone 13 Pro (Reacondicionado)',
-        image: '/assets/images/mock/product-5.webp',
-        price: 0,
-        details: {
-          screenSize: '6.1 pulgadas (pantalla verificada)',
-          camera: 'Triple cámara 12MP (calibrada)',
-          otherDetail: 'Batería reemplazada al 100%',
-        },
-      },
-      {
-        id: 'model-13-pro-max',
-        name: 'iPhone 13 Pro Max (Reacondicionado)',
-        image: '/assets/images/mock/product-4.webp',
-        price: 0,
-        details: {
-          screenSize: '6.7 pulgadas (pantalla verificada)',
-          camera: 'Triple cámara 12MP (calibrada)',
-          otherDetail: 'Batería reemplazada al 100%',
-        },
-      },
-    ];
-  }
-
-  // Samsung
-  if (productId === 's23-ultra-001') {
-    return [
-      {
-        id: 'model-s23',
-        name: 'Galaxy S23',
-        image: '/assets/images/mock/product-8.webp',
-        price: 0,
-        details: {
-          screenSize: '6.1 pulgadas Dynamic AMOLED',
-          camera: 'Triple cámara 50MP',
-          otherDetail: 'Snapdragon 8 Gen 2',
-        },
-      },
-      {
-        id: 'model-s23-plus',
-        name: 'Galaxy S23 Plus',
-        image: '/assets/images/mock/product-7.webp',
-        price: 0,
-        details: {
-          screenSize: '6.6 pulgadas Dynamic AMOLED',
-          camera: 'Triple cámara 50MP',
-          otherDetail: 'Mayor batería',
-        },
-      },
-      {
-        id: 'model-s23-ultra',
-        name: 'Galaxy S23 Ultra',
-        image: '/assets/images/mock/product-6.webp',
-        price: 0,
-        details: {
-          screenSize: '6.8 pulgadas Dynamic AMOLED 2X',
-          camera: 'Quad cámara 200MP con zoom óptico 10x',
-          otherDetail: 'Snapdragon 8 Gen 2 con S Pen integrado',
-        },
-      },
-    ];
-  }
-
-  // AirPods
-  if (productId === 'airpods-pro-2gen-001') {
-    return [
-      {
-        id: 'model-airpods-pro-2',
-        name: 'AirPods Pro (2da Gen)',
-        image: '/assets/images/mock/product-18.webp',
-        price: 0,
-        details: {
-          screenSize: '',
-          camera: 'Cancelación activa de ruido adaptable',
-          otherDetail: 'Chip H2 con audio espacial personalizado',
-        },
-      },
-    ];
-  }
-
-  return [];
+  const response = await productService.fetchModels(productId, conditionId);
+  return response.models;
 };
 
 // 2. Cuando selecciona MODELO → Carga ALMACENAMIENTO
@@ -265,327 +155,56 @@ const fetchStorageForModel = async (
   modelId: string,
   conditionId: string
 ): Promise<StorageOption[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 700));
-
-  // iPhone
-  if (productId === 'iphone-13-pro-max-001') {
-    // Nuevo tiene más opciones que refurbished
-    if (conditionId === 'new') {
-      return [
-        { id: 'storage-128', name: '128GB', price: 0 },
-        { id: 'storage-256', name: '256GB', price: 3000 },
-        { id: 'storage-512', name: '512GB', price: 6000 },
-        { id: 'storage-1tb', name: '1TB', price: 9000 },
-      ];
-    }
-    // Refurbished solo hasta 512GB
-    return [
-      { id: 'storage-128', name: '128GB', price: 0 },
-      { id: 'storage-256', name: '256GB', price: 2500 },
-      { id: 'storage-512', name: '512GB', price: 5000 },
-    ];
-  }
-
-  // Samsung
-  if (productId === 's23-ultra-001') {
-    return [
-      { id: 'storage-256', name: '256GB', price: 0 },
-      { id: 'storage-512', name: '512GB', price: 4000 },
-      { id: 'storage-1tb', name: '1TB', price: 8000 },
-    ];
-  }
-
-  // AirPods no tienen almacenamiento
-  return [];
+  const response = await productService.fetchStorage(productId, modelId, conditionId);
+  return response.storage;
 };
 
 // 3. Cuando selecciona ALMACENAMIENTO → Carga COLORES
 const fetchColorsForStorage = async (
   productId: string,
-  storageId: string
+  storageId: string,
+  modelId: string,
+  conditionId: string
 ): Promise<ColorOption[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  if (productId === 'iphone-13-pro-max-001') {
-    return [
-      {
-        id: 'color-blue',
-        name: 'Azul Sierra',
-        colorCode:
-          'linear-gradient(180deg, #1A2A44 0%, #2D405B 20.31%, #0A1727 38.22%, #4A556E 55.29%)',
-      },
-      {
-        id: 'color-graphite',
-        name: 'Grafito',
-        colorCode: 'linear-gradient(180deg, #54524F 0%, #3A3835 50%, #54524F 100%)',
-      },
-      {
-        id: 'color-gold',
-        name: 'Oro',
-        colorCode: 'linear-gradient(180deg, #F4E8CE 0%, #E8D4A8 50%, #D4BD88 100%)',
-      },
-      { id: 'color-silver', name: 'Plata', colorCode: '#E3E4E5' },
-    ];
-  }
-
-  if (productId === 's23-ultra-001') {
-    return [
-      {
-        id: 'color-black',
-        name: 'Phantom Black',
-        colorCode: 'linear-gradient(180deg, #1A1A1A 0%, #000000 100%)',
-      },
-      { id: 'color-cream', name: 'Cream', colorCode: '#F5EDD6' },
-      {
-        id: 'color-green',
-        name: 'Green',
-        colorCode: 'linear-gradient(180deg, #C7D8C6 0%, #A8C4A7 100%)',
-      },
-      {
-        id: 'color-lavender',
-        name: 'Lavender',
-        colorCode: 'linear-gradient(180deg, #E6DFF0 0%, #D4C8E1 100%)',
-      },
-    ];
-  }
-
-  if (productId === 'airpods-pro-2gen-001') {
-    return [{ id: 'color-white', name: 'Blanco', colorCode: '#FFFFFF' }];
-  }
-
-  return [];
+  const response = await productService.fetchColors(productId, storageId, modelId, conditionId);
+  // El backend devuelve colorCode que puede ser un color sólido o un gradiente
+  // Mantenemos compatibilidad con el código existente
+  return response.colors.map((color) => ({
+    ...color,
+    gradient: color.colorCode, // Usar colorCode como gradient para compatibilidad
+  }));
 };
 
 // 4. Cuando selecciona COLOR → Carga ACCESORIOS
 const fetchAccessoriesForColor = async (
   productId: string,
-  colorId: string
+  colorId: string,
+  modelId: string,
+  storageId: string
 ): Promise<Accessory[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 700));
-
-  if (productId === 'iphone-13-pro-max-001') {
-    return [
-      {
-        id: 'case-apple-1',
-        name: 'Funda MagSafe',
-        image: '/assets/images/mock/product-10.webp',
-        price: 1290,
-        availableColors: [
-          { id: 'case-black', name: 'Negro', colorCode: '#000000' },
-          {
-            id: 'case-blue',
-            name: 'Azul',
-            colorCode: 'linear-gradient(180deg, #1E3A8A 0%, #3B82F6 100%)',
-          },
-          {
-            id: 'case-red',
-            name: 'Rojo',
-            colorCode: 'linear-gradient(180deg, #DC2626 0%, #EF4444 100%)',
-          },
-        ],
-      },
-      {
-        id: 'charger-apple-1',
-        name: 'Cargador 20W',
-        image: '/assets/images/mock/product-11.webp',
-        price: 590,
-        availableColors: [{ id: 'charger-white', name: 'Blanco', colorCode: '#FFFFFF' }],
-      },
-      {
-        id: 'cable-apple-1',
-        name: 'Cable USB-C a Lightning',
-        image: '/assets/images/mock/product-12.webp',
-        price: 490,
-        availableColors: [{ id: 'cable-white', name: 'Blanco', colorCode: '#FFFFFF' }],
-      },
-      {
-        id: 'airpods-1',
-        name: 'AirPods Pro',
-        image: '/assets/images/mock/product-13.webp',
-        price: 6990,
-        availableColors: [{ id: 'airpods-white', name: 'Blanco', colorCode: '#FFFFFF' }],
-      },
-    ];
-  }
-
-  if (productId === 's23-ultra-001') {
-    return [
-      {
-        id: 'case-samsung-1',
-        name: 'Funda Protectora',
-        image: '/assets/images/mock/product-14.webp',
-        price: 890,
-        availableColors: [
-          { id: 'case-black', name: 'Negro', colorCode: '#000000' },
-          {
-            id: 'case-green',
-            name: 'Verde',
-            colorCode: 'linear-gradient(180deg, #2D5016 0%, #4A7C2E 100%)',
-          },
-        ],
-      },
-      {
-        id: 'charger-samsung-1',
-        name: 'Cargador Rápido 45W',
-        image: '/assets/images/mock/product-15.webp',
-        price: 790,
-        availableColors: [{ id: 'charger-white', name: 'Blanco', colorCode: '#FFFFFF' }],
-      },
-      {
-        id: 'spen-1',
-        name: 'S Pen de Repuesto',
-        image: '/assets/images/mock/product-16.webp',
-        price: 1290,
-        availableColors: [
-          { id: 'spen-black', name: 'Negro', colorCode: '#000000' },
-          { id: 'spen-white', name: 'Blanco', colorCode: '#FFFFFF' },
-        ],
-      },
-      {
-        id: 'buds-1',
-        name: 'Galaxy Buds2 Pro',
-        image: '/assets/images/mock/product-17.webp',
-        price: 4990,
-        availableColors: [
-          { id: 'buds-graphite', name: 'Grafito', colorCode: '#4A4A4A' },
-          { id: 'buds-white', name: 'Blanco', colorCode: '#FFFFFF' },
-        ],
-      },
-    ];
-  }
-
-  if (productId === 'airpods-pro-2gen-001') {
-    return [
-      {
-        id: 'case-airpods-1',
-        name: 'Estuche de Silicona',
-        image: '/assets/images/mock/product-21.webp',
-        price: 490,
-        availableColors: [
-          { id: 'case-white', name: 'Blanco', colorCode: '#FFFFFF' },
-          { id: 'case-black', name: 'Negro', colorCode: '#000000' },
-        ],
-      },
-      {
-        id: 'strap-airpods-1',
-        name: 'Correa para Estuche',
-        image: '/assets/images/mock/product-22.webp',
-        price: 290,
-        availableColors: [{ id: 'strap-black', name: 'Negro', colorCode: '#000000' }],
-      },
-      {
-        id: 'tips-airpods-1',
-        name: 'Puntas de Repuesto (4 pares)',
-        image: '/assets/images/mock/product-23.webp',
-        price: 390,
-        availableColors: [{ id: 'tips-white', name: 'Blanco', colorCode: '#FFFFFF' }],
-      },
-    ];
-  }
-
-  return [];
+  const response = await productService.fetchAccessories(productId, colorId, modelId, storageId);
+  // El backend devuelve colorCode, agregamos gradient para compatibilidad
+  return response.accessories.map((accessory) => ({
+    ...accessory,
+    availableColors: accessory.availableColors.map((color) => ({
+      ...color,
+      gradient: color.colorCode, // Usar colorCode como gradient para compatibilidad
+    })),
+  }));
 };
 
 // ============================================================================
-// Mock Initial Data - Datos iniciales de productos
+// Initial Data - Datos iniciales de productos desde el backend
 // ============================================================================
 
-export const getInitialProductData = (id: string): InitialProductData | null => {
-  const mockInitialData: Record<string, InitialProductData> = {
-    'iphone-13-pro-max-001': {
-      id: 'iphone-13-pro-max-001',
-      marca: 'Apple',
-      modelo: 'iPhone 13 Pro Max',
-      bannerBackgroundImage: '/assets/background/banner/iPhone.png',
-      bannerVariants: [
-        { id: 'mini', label: 'mini' },
-        { id: 'pro', label: 'PRO' },
-        { id: 'pro-max', label: 'PRO MAX' },
-      ],
-      thumbnailImage: '/assets/images/mock/product-1.webp',
-      // ESTADOS vienen en carga inicial (Nuevo/Refurbished)
-      conditions: [
-        {
-          id: 'new',
-          name: 'Nuevo',
-          price: 22990,
-          description: 'Producto completamente nuevo con garantía completa del fabricante',
-          images: [
-            '/assets/images/mock/product-1.webp',
-            '/assets/images/mock/product-2.webp',
-            '/assets/images/mock/product-3.webp',
-          ],
-        },
-        {
-          id: 'refurbished',
-          name: 'Refurbished',
-          price: 19541,
-          description: 'Producto reacondicionado certificado con garantía de 6 meses',
-          images: ['/assets/images/mock/product-4.webp', '/assets/images/mock/product-5.webp'],
-        },
-      ],
-    },
-
-    's23-ultra-001': {
-      id: 's23-ultra-001',
-      marca: 'Samsung',
-      modelo: 'Galaxy S23 Ultra',
-      bannerBackgroundImage: '/assets/background/banner/Samsung.png',
-      bannerVariants: [
-        { id: 'standard', label: 'Standard' },
-        { id: 'plus', label: 'Plus' },
-        { id: 'ultra', label: 'Ultra' },
-      ],
-      thumbnailImage: '/assets/images/mock/product-6.webp',
-      conditions: [
-        {
-          id: 'new',
-          name: 'Nuevo',
-          price: 24990,
-          description: 'Producto completamente nuevo con garantía completa del fabricante',
-          images: [
-            '/assets/images/mock/product-6.webp',
-            '/assets/images/mock/product-7.webp',
-            '/assets/images/mock/product-8.webp',
-          ],
-        },
-        {
-          id: 'refurbished',
-          name: 'Refurbished',
-          price: 21241,
-          description: 'Producto reacondicionado certificado con garantía de 6 meses',
-          images: ['/assets/images/mock/product-9.webp'],
-        },
-      ],
-    },
-
-    'airpods-pro-2gen-001': {
-      id: 'airpods-pro-2gen-001',
-      marca: 'Apple',
-      modelo: 'AirPods Pro (2da Generación)',
-      bannerBackgroundImage: '/assets/background/banner/iPhone.png',
-      bannerVariants: [],
-      thumbnailImage: '/assets/images/mock/product-18.webp',
-      conditions: [
-        {
-          id: 'new',
-          name: 'Nuevo',
-          price: 6990,
-          description: 'Producto completamente nuevo con garantía completa del fabricante',
-          images: ['/assets/images/mock/product-18.webp', '/assets/images/mock/product-19.webp'],
-        },
-        {
-          id: 'refurbished',
-          name: 'Refurbished',
-          price: 5941,
-          description: 'Producto reacondicionado certificado con garantía de 6 meses',
-          images: ['/assets/images/mock/product-20.webp'],
-        },
-      ],
-    },
-  };
-
-  return mockInitialData[id] || null;
+export const getInitialProductData = async (id: string): Promise<InitialProductData | null> => {
+  try {
+    const data = await productService.fetchInitialProduct(id);
+    return data;
+  } catch (error) {
+    console.error('Error fetching initial product data:', error);
+    return null;
+  }
 };
 
 // ============================================================================
@@ -720,7 +339,15 @@ export const useProductCheckoutStore = create<ProductCheckoutState>((set, get) =
           storage: { isLoading: false, isLoaded: true, error: null },
         },
       }));
-      get().calculateTotalPrice();
+
+      // Auto-seleccionar el almacenamiento con precio 0 (incluido) y cargar colores
+      const includedStorage = storage.find((s) => s.price === 0);
+      if (includedStorage) {
+        // Llamar a setStorage para seleccionar y cargar colores automáticamente
+        await get().setStorage(includedStorage.id);
+      } else {
+        get().calculateTotalPrice();
+      }
     } catch {
       set((state) => ({
         loadingStates: {
@@ -733,8 +360,8 @@ export const useProductCheckoutStore = create<ProductCheckoutState>((set, get) =
 
   // 3. Usuario selecciona ALMACENAMIENTO → Carga COLORES
   setStorage: async (storageId) => {
-    const { product } = get();
-    if (!product) return;
+    const { product, selectedOptions } = get();
+    if (!product || !selectedOptions.modelId || !selectedOptions.conditionId) return;
 
     set((state) => ({
       selectedOptions: {
@@ -757,7 +384,12 @@ export const useProductCheckoutStore = create<ProductCheckoutState>((set, get) =
     }));
 
     try {
-      const colors = await fetchColorsForStorage(product.id, storageId);
+      const colors = await fetchColorsForStorage(
+        product.id,
+        storageId,
+        selectedOptions.modelId,
+        selectedOptions.conditionId
+      );
       set((state) => ({
         product: { ...state.product!, colors },
         loadingStates: {
@@ -778,8 +410,8 @@ export const useProductCheckoutStore = create<ProductCheckoutState>((set, get) =
 
   // 4. Usuario selecciona COLOR → Carga ACCESORIOS
   setColor: async (colorId) => {
-    const { product } = get();
-    if (!product) return;
+    const { product, selectedOptions } = get();
+    if (!product || !selectedOptions.modelId || !selectedOptions.storageId) return;
 
     set((state) => ({
       selectedOptions: {
@@ -799,7 +431,12 @@ export const useProductCheckoutStore = create<ProductCheckoutState>((set, get) =
     }));
 
     try {
-      const accessories = await fetchAccessoriesForColor(product.id, colorId);
+      const accessories = await fetchAccessoriesForColor(
+        product.id,
+        colorId,
+        selectedOptions.modelId,
+        selectedOptions.storageId
+      );
       set((state) => ({
         product: { ...state.product!, accessories },
         loadingStates: {

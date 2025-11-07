@@ -28,12 +28,13 @@ export function AuthProvider({ children }: Props) {
 
   const checkUserSession = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(JWT_STORAGE_KEY);
+      // Buscar token primero en localStorage (usado por AuthStore), luego en sessionStorage
+      const accessToken = localStorage.getItem('access_token') || sessionStorage.getItem(JWT_STORAGE_KEY);
 
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken);
 
-        const res = await axios.get(endpoints.auth.me);
+        const res = await axios.get(endpoints.auth.profile);
 
         const { user } = res.data;
 

@@ -1,27 +1,28 @@
 'use client';
 
-import { m } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
-import Alert from '@mui/material/Alert';
-import Radio from '@mui/material/Radio';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
-import CircularProgress from '@mui/material/CircularProgress';
 
 import { getInitialProductData, useProductCheckoutStore } from 'src/store/product-checkout-store';
+// import { useRequireAuth } from 'src/hooks/use-require-auth'; // Descomentar para requerir autenticación
 
-import { varFade } from 'src/components/animate';
-
+import { NuevoIcon } from './components/nuevo-icon';
+import { StorageIcon } from './components/storage-icon';
+import { ColorCarousel } from './components/color-carousel';
 import { VerifiedModal } from './components/verified-modal';
+import { ModelCarousel } from './components/model-carousel';
+import { SelectionCircle } from './components/selection-circle';
+import { RefurbishedIcon } from './components/refurbished-icon';
+import { CheckoutSummary } from './components/checkout-summary';
+import { AccessorySection } from './components/accessory-section';
+import { CheckoutCarousel } from './components/checkout-carousel';
 import { ConditionCarousel } from './components/condition-carousel';
 import { ProductHeroBanner } from './components/product-hero-banner';
 
@@ -46,13 +47,23 @@ export default function ProductoPage({ params }: Props) {
     setAccessoryColor,
   } = useProductCheckoutStore();
 
+  // OPCIONAL: Descomentar la siguiente línea para requerir autenticación en esta página
+  // useRequireAuth();
+
   const [verifiedModalOpen, setVerifiedModalOpen] = useState(false);
+  const [hoveredConditionId, setHoveredConditionId] = useState<string | null>(null);
+  const [hoveredModelId, setHoveredModelId] = useState<string | null>(null);
+  const [hoveredStorageId, setHoveredStorageId] = useState<string | null>(null);
+  const [hoveredColorId, setHoveredColorId] = useState<string | null>(null);
+  const [selectedAccessoryColors, setSelectedAccessoryColors] = useState<Record<string, string>>(
+    {}
+  );
 
   // Cargar producto según el ID de la ruta (sin auto-selección)
   useEffect(() => {
     const loadProduct = async () => {
       const { id } = await params;
-      const initialData = getInitialProductData(id);
+      const initialData = await getInitialProductData(id);
       if (initialData) {
         setInitialProduct(initialData);
         // NO auto-seleccionar nada
@@ -75,20 +86,17 @@ export default function ProductoPage({ params }: Props) {
       {/* Product Hero Banner */}
       <ProductHeroBanner
         productName={product.modelo}
-        backgroundImage={product.bannerBackgroundImage}
+        backgroundImage={
+          // product.bannerBackgroundImage ||
+          product.marca.toLowerCase().includes('apple')
+            ? '/assets/background/banner/iPhone.png'
+            : '/assets/background/banner/Samsung.png'
+        }
         variants={product.bannerVariants}
       />
 
       {/* Step 0: Estado (siempre visible, ya cargado) */}
-      <Box
-        id="step-0"
-        component={m.div}
-        variants={varFade('inUp')}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true, amount: 0.3 }}
-        sx={{ minHeight: '70vh', py: 6 }}
-      >
+      <Box id="step-0" sx={{ minHeight: '70vh', py: 6 }}>
         <Box
           sx={{
             display: 'flex',
@@ -167,11 +175,11 @@ export default function ProductoPage({ params }: Props) {
             <Typography
               sx={{
                 color: '#A49A8F',
-                fontSize: '48px',
                 fontWeight: 500,
-                lineHeight: '60px',
                 letterSpacing: '-0.96px',
                 mb: 3,
+                fontSize: { xs: '32px', md: '48px' },
+                lineHeight: { xs: '40px', md: '60px' },
               }}
             >
               <span style={{ color: '#7F746A' }}>Selecciona</span> el estado del{' '}
@@ -227,73 +235,138 @@ export default function ProductoPage({ params }: Props) {
             {/* Cards de estados */}
             <Grid container spacing={3}>
               {product.conditions.map((condition) => (
-                <Grid
-                  size={{ xs: 12, sm: selectedOptions.conditionId ? 6 : 3.5 }}
-                  key={condition.id}
-                >
+                <Grid size={{ xs: 12, sm: selectedOptions.conditionId ? 5 : 3 }} key={condition.id}>
                   <Card
                     onClick={() => setCondition(condition.id)}
+                    onMouseEnter={() => setHoveredConditionId(condition.id)}
+                    onMouseLeave={() => setHoveredConditionId(null)}
                     sx={{
                       cursor: 'pointer',
                       width: { xs: '100%', sm: 296 },
-                      height: 296,
+                      height: { xs: 196, md: 296 },
+                      position: 'relative',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'center',
                       alignItems: 'center',
-                      gap: '24px',
+                      gap: '89px',
                       flexShrink: 0,
-                      border: 2,
-                      borderColor:
-                        selectedOptions.conditionId === condition.id ? 'primary.main' : 'divider',
+                      overflow: 'hidden',
                       transition: 'all 0.2s',
+                      willChange: 'transform',
                       '&:hover': {
                         borderColor: 'primary.main',
                         transform: 'translateY(-4px)',
                       },
                     }}
                   >
-                    <CardContent
+                    {/* Capa 1: Imagen de fondo específica */}
+                    <Box
+                      component="img"
+                      src={
+                        condition.id === 'new'
+                          ? '/assets/background/cards/nuevo.png'
+                          : '/assets/background/cards/usado.png'
+                      }
+                      alt={condition.name}
                       sx={{
-                        textAlign: 'center',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 2,
+                        position: 'absolute',
+                        top: 20,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        zIndex: 0,
+                      }}
+                    />
+
+                    {/* Capa 2: Gradiente + Blur */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        background:
+                          'linear-gradient(322deg, rgba(208, 203, 194, 0.26) -1.74%, rgba(127, 116, 106, 0.48) 63.01%)',
+                        backdropFilter:
+                          selectedOptions.conditionId === condition.id
+                            ? 'blur(30.45px)'
+                            : 'blur(21.45px)',
+                        zIndex: 1,
+                      }}
+                    />
+
+                    {/* Círculo de selección superior derecha (siempre visible) */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 16,
+                        right: 16,
+                        zIndex: 3,
                       }}
                     >
-                      {/* Imagen principal del estado */}
-                      {condition.images[0] && (
-                        <Box
-                          sx={{
-                            width: 120,
-                            height: 120,
-                            borderRadius: 2,
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <Box
-                            component="img"
-                            src={condition.images[0]}
-                            alt={condition.name}
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                            }}
-                          />
-                        </Box>
+                      <SelectionCircle
+                        state={
+                          selectedOptions.conditionId === condition.id
+                            ? 'selected'
+                            : hoveredConditionId === condition.id
+                              ? 'hover'
+                              : 'default'
+                        }
+                      />
+                    </Box>
+
+                    {/* Ícono superior izquierda */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 16,
+                        left: 16,
+                        zIndex: 3,
+                      }}
+                    >
+                      {condition.id === 'new' ? (
+                        <NuevoIcon width={64} height={64} />
+                      ) : (
+                        <RefurbishedIcon width={68} height={64} />
                       )}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                          {condition.name}
-                        </Typography>
-                        <Radio checked={selectedOptions.conditionId === condition.id} />
-                      </Box>
-                      <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
+                    </Box>
+
+                    {/* Contenido pegado abajo y alineado a la izquierda */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: 24,
+                        left: 24,
+                        zIndex: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'white',
+                          textAlign: 'left',
+                        }}
+                      >
+                        {condition.name}
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'white',
+                          textAlign: 'left',
+                        }}
+                      >
                         A partir de {formatPrice(condition.price)}
                       </Typography>
-                    </CardContent>
+                    </Box>
                   </Card>
                 </Grid>
               ))}
@@ -305,615 +378,584 @@ export default function ProductoPage({ params }: Props) {
         <VerifiedModal open={verifiedModalOpen} onClose={() => setVerifiedModalOpen(false)} />
       </Box>
 
-      <Divider sx={{ my: 4 }} />
-
       {/* Step 1: Modelo (disabled hasta seleccionar estado) */}
       <Box
         id="step-1"
-        component={m.div}
-        variants={varFade('inUp')}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true, amount: 0.3 }}
-        sx={{ minHeight: '70vh', py: 6 }}
+        sx={{
+          minHeight: '70vh',
+          py: 8,
+          bgcolor: '#F8F8F8',
+          px: 3,
+        }}
       >
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 4 }}>
-          Elige tu modelo
+        {/* Chip superior */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <Box
+            sx={{
+              borderRadius: '10px',
+              display: 'flex',
+              width: 'fit-content',
+              padding: '10px 37px',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '10px',
+              background: '#FFF',
+            }}
+          >
+            <Typography
+              sx={{
+                color: '#7F746A',
+                textAlign: 'center',
+                fontSize: '16px',
+                fontWeight: 600,
+                lineHeight: '24px',
+                letterSpacing: '-0.16px',
+              }}
+            >
+              Modelo
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Título */}
+        <Typography
+          sx={{
+            color: '#A49A8F',
+            fontWeight: 500,
+            letterSpacing: '-0.96px',
+            mb: 6,
+            textAlign: 'center',
+            fontSize: { xs: '32px', md: '48px' },
+            lineHeight: { xs: '40px', md: '60px' },
+          }}
+        >
+          <span style={{ color: '#7F746A' }}>Selecciona</span> el modelo
         </Typography>
 
-        {/* Loading state */}
-        {loadingStates.models.isLoading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress />
+        {/* Carrusel de modelos o placeholders */}
+        {product.models && product.models.length > 0 ? (
+          <ModelCarousel
+            models={product.models}
+            selectedModelId={selectedOptions.modelId}
+            hoveredModelId={hoveredModelId}
+            onSelectModel={(id) => loadingStates.models.isLoaded && setModel(id)}
+            onHoverModel={setHoveredModelId}
+            formatPrice={formatPrice}
+            isLoaded={loadingStates.models.isLoaded}
+          />
+        ) : (
+          <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexDirection: 'row' }}>
+            {[1, 2, 3].map((i) => (
+              <Card
+                key={i}
+                sx={{
+                  width: 400,
+                  height: 300,
+                  opacity: 0.3,
+                  bgcolor: '#E0E0E0',
+                  pointerEvents: 'none',
+                  display: { xs: i > 1 ? 'none' : 'block', md: 'block' },
+                }}
+              >
+                <CardContent>
+                  <Skeleton variant="text" width="60%" sx={{ mb: 2 }} />
+                  <Skeleton variant="text" width="40%" sx={{ mb: 3 }} />
+                  <Skeleton variant="rectangular" width="100%" height={280} sx={{ mb: 2 }} />
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Skeleton variant="rectangular" width={60} height={40} />
+                    <Skeleton variant="rectangular" width={60} height={40} />
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
           </Box>
         )}
-
-        {/* Error state */}
-        {loadingStates.models.error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {loadingStates.models.error}
-          </Alert>
-        )}
-
-        {/* Info - esperando selección anterior */}
-        {!loadingStates.models.isLoaded && !loadingStates.models.isLoading && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            Selecciona un estado para ver modelos disponibles
-          </Alert>
-        )}
-
-        <Grid container spacing={3}>
-          {product.models && product.models.length > 0
-            ? product.models.map((model) => (
-                <Grid size={{ xs: 12 }} key={model.id}>
-                  <Card
-                    onClick={() => loadingStates.models.isLoaded && setModel(model.id)}
-                    sx={{
-                      cursor: loadingStates.models.isLoaded ? 'pointer' : 'not-allowed',
-                      opacity: loadingStates.models.isLoaded ? 1 : 0.4,
-                      border: 2,
-                      borderColor:
-                        selectedOptions.modelId === model.id ? 'primary.main' : 'divider',
-                      transition: 'all 0.2s',
-                      pointerEvents: loadingStates.models.isLoaded ? 'auto' : 'none',
-                      '&:hover': {
-                        borderColor: loadingStates.models.isLoaded ? 'primary.main' : 'divider',
-                        transform: loadingStates.models.isLoaded ? 'translateY(-4px)' : 'none',
-                      },
-                    }}
-                  >
-                    <CardContent>
-                      <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-                        <Box
-                          sx={{
-                            width: 200,
-                            height: 200,
-                            borderRadius: 2,
-                            overflow: 'hidden',
-                            flexShrink: 0,
-                          }}
-                        >
-                          <Box
-                            component="img"
-                            src={model.image}
-                            alt={model.name}
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                            }}
-                          />
-                        </Box>
-                        <Box sx={{ flex: 1 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                              {model.name}
-                            </Typography>
-                            <Radio checked={selectedOptions.modelId === model.id} />
-                          </Box>
-                          {model.price > 0 && (
-                            <Typography
-                              variant="h6"
-                              color="primary.main"
-                              sx={{ fontWeight: 700, mb: 2 }}
-                            >
-                              +{formatPrice(model.price)}
-                            </Typography>
-                          )}
-                          {model.details.screenSize && (
-                            <Typography variant="body1" color="text.secondary" paragraph>
-                              {model.details.screenSize}
-                            </Typography>
-                          )}
-                          {model.details.camera && (
-                            <Typography variant="body1" color="text.secondary" paragraph>
-                              {model.details.camera}
-                            </Typography>
-                          )}
-                          {model.details.otherDetail && (
-                            <Typography variant="body1" color="text.secondary">
-                              {model.details.otherDetail}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))
-            : // Placeholder cuando no hay datos
-              !loadingStates.models.isLoading && (
-                <Grid size={{ xs: 12 }}>
-                  <Card sx={{ opacity: 0.3 }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', gap: 3 }}>
-                        <Skeleton variant="rectangular" width={200} height={200} />
-                        <Box sx={{ flex: 1 }}>
-                          <Skeleton variant="text" width="40%" sx={{ mb: 2 }} />
-                          <Skeleton variant="text" width="60%" sx={{ mb: 1 }} />
-                          <Skeleton variant="text" width="80%" />
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              )}
-        </Grid>
       </Box>
-
-      <Divider sx={{ my: 4 }} />
 
       {/* Step 2: Almacenamiento (disabled hasta seleccionar modelo) */}
       <Box
         id="step-2"
-        component={m.div}
-        variants={varFade('inUp')}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true, amount: 0.3 }}
-        sx={{ minHeight: '70vh', py: 6 }}
+        sx={{
+          minHeight: '70vh',
+          py: 6,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+        }}
       >
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 4 }}>
-          Almacenamiento
-        </Typography>
+        {/* Layout de dos columnas */}
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 4,
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'stretch', md: 'flex-start' },
+          }}
+        >
+          {/* Lado izquierdo: Chip y Título */}
+          <Box
+            sx={{
+              width: { xs: '100%', md: '40%' },
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 3,
+            }}
+          >
+            {/* Chip */}
+            <Box
+              sx={{
+                borderRadius: '10px',
+                display: 'flex',
+                width: 'fit-content',
+                padding: '10px 37px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '10px',
+                background: '#F8F8F8',
+              }}
+            >
+              <Typography
+                sx={{
+                  color: '#7F746A',
+                  textAlign: 'center',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  lineHeight: '24px',
+                  letterSpacing: '-0.16px',
+                }}
+              >
+                Almacenamiento
+              </Typography>
+            </Box>
 
-        {/* Loading state */}
-        {loadingStates.storage.isLoading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress />
+            {/* Título */}
+            <Typography
+              sx={{
+                color: '#A49A8F',
+                fontSize: { xs: '32px', md: '48px' },
+                fontWeight: 500,
+                lineHeight: { xs: '40px', md: '60px' },
+                letterSpacing: '-0.96px',
+                textAlign: 'left',
+              }}
+            >
+              <span style={{ color: '#7F746A' }}>Selecciona</span> el almacenamiento
+            </Typography>
           </Box>
-        )}
 
-        {/* Error state */}
-        {loadingStates.storage.error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {loadingStates.storage.error}
-          </Alert>
-        )}
-
-        {/* Info - esperando selección anterior */}
-        {!loadingStates.storage.isLoaded && !loadingStates.storage.isLoading && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            Selecciona un modelo para ver almacenamientos disponibles
-          </Alert>
-        )}
-
-        <Grid container spacing={3}>
-          {product.storage && product.storage.length > 0
-            ? product.storage.map((storage) => (
-                <Grid size={{ xs: 6, sm: 3 }} key={storage.id}>
+          {/* Lado derecho: Cards de almacenamiento */}
+          <Box
+            sx={{
+              width: { xs: '100%', md: '60%' },
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 3,
+            }}
+          >
+            {/* Cards de almacenamiento en columna o placeholders */}
+            {product.storage && product.storage.length > 0
+              ? product.storage.map((storage) => (
                   <Card
+                    key={storage.id}
                     onClick={() => loadingStates.storage.isLoaded && setStorage(storage.id)}
+                    onMouseEnter={() => setHoveredStorageId(storage.id)}
+                    onMouseLeave={() => setHoveredStorageId(null)}
                     sx={{
+                      display: 'flex',
+                      height: 68,
+                      padding: '18px',
+                      background: '#F8F8F8',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
                       cursor: loadingStates.storage.isLoaded ? 'pointer' : 'not-allowed',
                       opacity: loadingStates.storage.isLoaded ? 1 : 0.4,
-                      border: 2,
-                      borderColor:
-                        selectedOptions.storageId === storage.id ? 'primary.main' : 'divider',
+                      border: '1px solid',
+                      borderColor: selectedOptions.storageId === storage.id ? '#7F746A' : 'divider',
                       transition: 'all 0.2s',
+                      borderRadius: '18px',
                       pointerEvents: loadingStates.storage.isLoaded ? 'auto' : 'none',
                       '&:hover': {
-                        borderColor: loadingStates.storage.isLoaded ? 'primary.main' : 'divider',
-                        transform: loadingStates.storage.isLoaded ? 'translateY(-4px)' : 'none',
+                        borderColor: loadingStates.storage.isLoaded ? '#7F746A' : 'divider',
                       },
                     }}
                   >
-                    <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                        {storage.name}
-                      </Typography>
-                      <Typography variant="body2" color="primary">
-                        {storage.price > 0 ? `+${formatPrice(storage.price)}` : 'Incluido'}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))
-            : // Placeholders cuando no hay datos
-              !loadingStates.storage.isLoading &&
-              [1, 2, 3, 4].map((i) => (
-                <Grid size={{ xs: 6, sm: 3 }} key={i}>
-                  <Card sx={{ opacity: 0.3 }}>
-                    <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                      <Skeleton variant="text" sx={{ mb: 1 }} />
-                      <Skeleton variant="text" width="60%" sx={{ mx: 'auto' }} />
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-        </Grid>
-      </Box>
-
-      <Divider sx={{ my: 4 }} />
-
-      {/* Step 3: Color */}
-      <Box
-        id="step-3"
-        component={m.div}
-        variants={varFade('inUp')}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true, amount: 0.3 }}
-        sx={{ minHeight: '70vh', py: 6 }}
-      >
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 4 }}>
-          Color
-        </Typography>
-
-        {/* Loading state */}
-        {loadingStates.colors.isLoading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress />
-          </Box>
-        )}
-
-        {/* Error state */}
-        {loadingStates.colors.error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {loadingStates.colors.error}
-          </Alert>
-        )}
-
-        {/* Info - esperando selección anterior */}
-        {!loadingStates.colors.isLoaded && !loadingStates.colors.isLoading && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            Selecciona el almacenamiento para ver colores disponibles
-          </Alert>
-        )}
-
-        <Grid container spacing={3}>
-          {product.colors && product.colors.length > 0
-            ? product.colors.map((color) => (
-                <Grid size={{ xs: 6, sm: 3 }} key={color.id}>
-                  <Card
-                    onClick={() => loadingStates.colors.isLoaded && setColor(color.id)}
-                    sx={{
-                      cursor: loadingStates.colors.isLoaded ? 'pointer' : 'not-allowed',
-                      opacity: loadingStates.colors.isLoaded ? 1 : 0.5,
-                      border: 2,
-                      borderColor:
-                        selectedOptions.colorId === color.id ? 'primary.main' : 'divider',
-                      transition: 'all 0.2s',
-                      pointerEvents: loadingStates.colors.isLoaded ? 'auto' : 'none',
-                      '&:hover': {
-                        borderColor: loadingStates.colors.isLoaded ? 'primary.main' : 'divider',
-                        transform: loadingStates.colors.isLoaded ? 'translateY(-4px)' : 'none',
-                      },
-                    }}
-                  >
-                    <CardContent sx={{ textAlign: 'center' }}>
-                      <Box
-                        sx={{
-                          width: 60,
-                          height: 60,
-                          borderRadius: '50%',
-                          background: color.colorCode,
-                          mx: 'auto',
-                          mb: 2,
-                          border: '2px solid',
-                          borderColor: 'divider',
-                        }}
-                      />
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {color.name}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))
-            : // Placeholders cuando no hay datos
-              !loadingStates.colors.isLoading &&
-              [1, 2, 3, 4].map((i) => (
-                <Grid size={{ xs: 6, sm: 3 }} key={i}>
-                  <Card sx={{ opacity: 0.3 }}>
-                    <CardContent sx={{ textAlign: 'center' }}>
-                      <Skeleton
-                        variant="circular"
-                        width={60}
-                        height={60}
-                        sx={{ mx: 'auto', mb: 2 }}
-                      />
-                      <Skeleton variant="text" width="60%" sx={{ mx: 'auto' }} />
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-        </Grid>
-      </Box>
-
-      <Divider sx={{ my: 4 }} />
-
-      {/* Step 4: Accesorios */}
-      <Box
-        id="step-4"
-        component={m.div}
-        variants={varFade('inUp')}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true, amount: 0.3 }}
-        sx={{ minHeight: '70vh', py: 6 }}
-      >
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 4 }}>
-          Accesorios
-        </Typography>
-
-        {/* Loading state */}
-        {loadingStates.accessories.isLoading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress />
-          </Box>
-        )}
-
-        {/* Error state */}
-        {loadingStates.accessories.error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {loadingStates.accessories.error}
-          </Alert>
-        )}
-
-        {/* Info - esperando selección anterior */}
-        {!loadingStates.accessories.isLoaded && !loadingStates.accessories.isLoading && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            Selecciona un color para ver accesorios disponibles
-          </Alert>
-        )}
-
-        <Grid container spacing={3}>
-          {product.accessories && product.accessories.length > 0
-            ? product.accessories.map((accessory) => {
-                const isSelected = selectedOptions.accessoryIds.includes(accessory.id);
-                const selectedColorId = selectedOptions.accessoryColors[accessory.id];
-                return (
-                  <Grid size={{ xs: 12, sm: 6 }} key={accessory.id}>
-                    <Card
+                    {/* Contenido de la card: SelectionCircle, Icon, Capacidad, Precio */}
+                    <Box
                       sx={{
-                        cursor: 'pointer',
-                        border: 2,
-                        borderColor: isSelected ? 'primary.main' : 'divider',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          borderColor: 'primary.main',
-                          transform: 'translateY(-4px)',
-                        },
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        height: '100%',
                       }}
                     >
-                      <CardContent>
-                        {/* Imagen del accesorio */}
-                        <Box
-                          sx={{
-                            width: '100%',
-                            height: 150,
-                            borderRadius: 2,
-                            overflow: 'hidden',
-                            mb: 2,
-                          }}
-                        >
-                          <Box
-                            component="img"
-                            src={accessory.image}
-                            alt={accessory.name}
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                            }}
-                          />
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                          <Typography variant="h6">{accessory.name}</Typography>
-                          <Chip
-                            label={formatPrice(accessory.price)}
-                            color={isSelected ? 'primary' : 'default'}
-                          />
-                        </Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                          Accesorio original compatible con {product.modelo}
-                        </Typography>
+                      {/* SelectionCircle */}
+                      <SelectionCircle
+                        color="#7F746A"
+                        state={
+                          selectedOptions.storageId === storage.id
+                            ? 'selected'
+                            : hoveredStorageId === storage.id
+                              ? 'hover'
+                              : 'default'
+                        }
+                      />
 
-                        {/* Selector de colores si hay más de uno disponible */}
-                        {accessory.availableColors.length > 0 && (
-                          <Box sx={{ mb: 2 }}>
-                            <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>
-                              {accessory.availableColors.length > 1
-                                ? 'Colores disponibles:'
-                                : 'Color:'}
-                            </Typography>
-                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                              {accessory.availableColors.map((color) => (
-                                <Chip
-                                  key={color.id}
-                                  label={color.name}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (isSelected || accessory.availableColors.length === 1) {
-                                      setAccessoryColor(accessory.id, color.id);
-                                      if (!isSelected) {
-                                        toggleAccessory(accessory.id);
-                                      }
-                                    }
-                                  }}
-                                  disabled={!isSelected && accessory.availableColors.length > 1}
-                                  sx={{
-                                    background:
-                                      selectedColorId === color.id
-                                        ? color.colorCode
-                                        : 'rgba(0,0,0,0.08)',
-                                    color:
-                                      selectedColorId === color.id
-                                        ? color.colorCode.startsWith('#') &&
-                                          (color.colorCode === '#FFFFFF' ||
-                                            color.colorCode === '#ffffff')
-                                          ? '#000'
-                                          : '#FFF'
-                                        : 'text.primary',
-                                    border:
-                                      selectedColorId === color.id ? '2px solid' : '1px solid',
-                                    borderColor:
-                                      selectedColorId === color.id ? 'primary.main' : 'divider',
-                                    '&:hover': {
-                                      background:
-                                        selectedColorId === color.id
-                                          ? color.colorCode
-                                          : 'rgba(0,0,0,0.12)',
-                                    },
-                                  }}
-                                />
-                              ))}
-                            </Box>
-                          </Box>
-                        )}
+                      {/* StorageIcon */}
+                      <StorageIcon capacity={storage.name} width={28} height={28} />
 
-                        {/* Botón para agregar/quitar */}
-                        <Button
-                          fullWidth
-                          variant={isSelected ? 'contained' : 'outlined'}
-                          onClick={() => {
-                            if (!isSelected && accessory.availableColors.length > 0) {
-                              setAccessoryColor(accessory.id, accessory.availableColors[0].id);
-                            }
-                            toggleAccessory(accessory.id);
-                          }}
-                          sx={{
-                            borderRadius: '27px',
-                            textTransform: 'none',
-                            fontWeight: 600,
-                          }}
-                        >
-                          {isSelected ? 'Quitar' : 'Agregar'}
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                );
-              })
-            : // Placeholders cuando no hay datos
-              !loadingStates.accessories.isLoading &&
-              [1, 2].map((i) => (
-                <Grid size={{ xs: 12, sm: 6 }} key={i}>
-                  <Card sx={{ opacity: 0.3 }}>
-                    <CardContent>
-                      <Skeleton variant="rectangular" width="100%" height={150} sx={{ mb: 2 }} />
-                      <Skeleton variant="text" width="60%" sx={{ mb: 1 }} />
-                      <Skeleton variant="text" width="80%" sx={{ mb: 2 }} />
-                      <Skeleton variant="rectangular" width="100%" height={40} />
-                    </CardContent>
+                      {/* Capacidad */}
+                      <Typography
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: '16px',
+                          color: '#7F746A',
+                        }}
+                      >
+                        {storage.name}
+                      </Typography>
+                    </Box>
+
+                    {/* Precio */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        height: '100%',
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontWeight: 500,
+                          fontSize: '14px',
+                          color: '#7F746A',
+                        }}
+                      >
+                        {storage.price > 0 ? `+${formatPrice(storage.price)}` : 'Incluido'}
+                      </Typography>
+                    </Box>
                   </Card>
-                </Grid>
-              ))}
-        </Grid>
+                ))
+              : // Placeholders cuando no hay datos
+                [1, 2, 3, 4].map((i) => (
+                  <Card
+                    key={i}
+                    sx={{
+                      display: 'flex',
+                      height: 68,
+                      padding: '18px',
+                      opacity: 0.3,
+                      bgcolor: '#E0E0E0',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <Skeleton variant="rectangular" width="100%" height="100%" />
+                  </Card>
+                ))}
+          </Box>
+        </Box>
       </Box>
 
-      <Divider sx={{ my: 4 }} />
+      {/* Step 3: Color */}
+      <Box id="step-3" sx={{ minHeight: '70vh', py: 6 }}>
+        {/* Chip superior */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <Box
+            sx={{
+              borderRadius: '10px',
+              display: 'flex',
+              width: 'fit-content',
+              padding: '10px 37px',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '10px',
+              background: '#F8F8F8',
+            }}
+          >
+            <Typography
+              sx={{
+                color: '#7F746A',
+                textAlign: 'center',
+                fontSize: '16px',
+                fontWeight: 600,
+                lineHeight: '24px',
+                letterSpacing: '-0.16px',
+              }}
+            >
+              Color
+            </Typography>
+          </Box>
+        </Box>
 
-      {/* Step 5: Pago */}
-      <Box
-        id="step-5"
-        component={m.div}
-        variants={varFade('inUp')}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true, amount: 0.3 }}
-        sx={{ minHeight: '70vh', py: 6 }}
-      >
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 4 }}>
-          Resumen y Pago
+        {/* Título */}
+        <Typography
+          sx={{
+            color: '#A49A8F',
+            fontWeight: 500,
+            letterSpacing: '-0.96px',
+            mb: 6,
+            textAlign: 'center',
+            fontSize: { xs: '32px', md: '48px' },
+            lineHeight: { xs: '40px', md: '60px' },
+          }}
+        >
+          <span style={{ color: '#7F746A' }}>Escoge</span> el color de tu smartphone
         </Typography>
-        <Grid container spacing={4}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Tu selección
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography>Estado:</Typography>
-                  <Typography fontWeight={600}>
-                    {product.conditions?.find((c) => c.id === selectedOptions.conditionId)?.name ||
-                      '-'}
-                  </Typography>
-                </Box>
-                {product.storage && product.storage.length > 0 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography>Almacenamiento:</Typography>
-                    <Typography fontWeight={600}>
-                      {product.storage.find((s) => s.id === selectedOptions.storageId)?.name || '-'}
-                    </Typography>
-                  </Box>
-                )}
-                {product.models && product.models.length > 0 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography>Modelo:</Typography>
-                    <Typography fontWeight={600}>
-                      {product.models.find((model) => model.id === selectedOptions.modelId)?.name ||
-                        '-'}
-                    </Typography>
-                  </Box>
-                )}
-                {product.colors && product.colors.length > 0 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography>Color:</Typography>
-                    <Typography fontWeight={600}>
-                      {product.colors.find((c) => c.id === selectedOptions.colorId)?.name || '-'}
-                    </Typography>
-                  </Box>
-                )}
-                {selectedOptions.accessoryIds.length > 0 && product.accessories && (
-                  <>
-                    <Divider sx={{ my: 2 }} />
-                    <Typography variant="subtitle2" gutterBottom>
-                      Accesorios:
-                    </Typography>
-                    {selectedOptions.accessoryIds.map((accId) => {
-                      const acc = product.accessories!.find((a) => a.id === accId);
-                      const colorId = selectedOptions.accessoryColors[accId];
-                      const color = acc?.availableColors.find((c) => c.id === colorId);
-                      return (
-                        <Box
-                          key={accId}
-                          sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}
-                        >
-                          <Typography variant="body2">
-                            {acc?.name}
-                            {color && ` - ${color.name}`}
-                          </Typography>
-                          <Typography variant="body2">{formatPrice(acc?.price || 0)}</Typography>
-                        </Box>
-                      );
-                    })}
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Card sx={{ position: 'sticky', top: 120 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Total
-                </Typography>
-                <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main', mb: 3 }}>
-                  {formatPrice(totalPrice)}
-                </Typography>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  size="large"
+
+        {/* Carrusel de colores o placeholders */}
+        {product.colors && product.colors.length > 0 ? (
+          <ColorCarousel
+            colors={product.colors}
+            selectedColorId={selectedOptions.colorId}
+            hoveredColorId={hoveredColorId}
+            onSelectColor={(id) => loadingStates.colors.isLoaded && setColor(id)}
+            onHoverColor={setHoveredColorId}
+            isLoaded={loadingStates.colors.isLoaded}
+          />
+        ) : (
+          <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {[1, 2, 3, 4].map((i) => (
+              <Card
+                key={i}
+                sx={{
+                  width: { xs: 280, sm: 300 },
+                  height: { xs: 280, sm: 300 },
+                  opacity: 0.3,
+                  bgcolor: '#E0E0E0',
+                  pointerEvents: 'none',
+                  display: { xs: i > 1 ? 'none' : 'block', sm: 'block' },
+                }}
+              >
+                <Skeleton variant="rectangular" width="100%" height="100%" />
+              </Card>
+            ))}
+          </Box>
+        )}
+      </Box>
+
+      {/* Step 4: Accesorios */}
+      <Box id="step-4" sx={{ minHeight: '70vh', py: 6 }}>
+        {/* Chip superior */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <Box
+            sx={{
+              borderRadius: '10px',
+              display: 'flex',
+              width: 'fit-content',
+              padding: '10px 37px',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '10px',
+              background: '#F8F8F8',
+            }}
+          >
+            <Typography
+              sx={{
+                color: '#7F746A',
+                textAlign: 'center',
+                fontSize: '16px',
+                fontWeight: 600,
+                lineHeight: '24px',
+                letterSpacing: '-0.16px',
+              }}
+            >
+              Accesorios
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Título */}
+        <Typography
+          sx={{
+            color: '#A49A8F',
+            fontWeight: 500,
+            letterSpacing: '-0.96px',
+            mb: 6,
+            textAlign: 'center',
+            fontSize: { xs: '32px', md: '48px' },
+            lineHeight: { xs: '40px', md: '60px' },
+          }}
+        >
+          <span style={{ color: '#7F746A' }}>Agrega</span> accesorios para tu smartphone
+        </Typography>
+
+        {/* Mapear cada accesorio como AccessorySection o placeholders */}
+        {product.accessories && product.accessories.length > 0
+          ? product.accessories.map((accessory) => {
+              const isSelected = selectedOptions.accessoryIds.includes(accessory.id);
+              const selectedColorId =
+                selectedAccessoryColors[accessory.id] ||
+                (accessory.availableColors.length > 0 ? accessory.availableColors[0].id : '');
+
+              return (
+                <AccessorySection
+                  key={accessory.id}
+                  accessory={accessory}
+                  isSelected={isSelected}
+                  selectedColorId={selectedColorId}
+                  onToggle={() => {
+                    // Si no está seleccionado y tiene colores, asignar el primer color
+                    if (!isSelected && accessory.availableColors.length > 0) {
+                      const colorToSet =
+                        selectedAccessoryColors[accessory.id] || accessory.availableColors[0].id;
+                      setAccessoryColor(accessory.id, colorToSet);
+                    }
+                    toggleAccessory(accessory.id);
+                  }}
+                  onColorSelect={(colorId) => {
+                    // Actualizar el estado local y el store
+                    setSelectedAccessoryColors((prev) => ({
+                      ...prev,
+                      [accessory.id]: colorId,
+                    }));
+                    setAccessoryColor(accessory.id, colorId);
+                  }}
+                  formatPrice={formatPrice}
+                />
+              );
+            })
+          : // Placeholders cuando no hay datos
+            [1].map((i) => (
+              <Box
+                key={i}
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: 4,
+                  mb: 6,
+                  opacity: 0.3,
+                }}
+              >
+                <Box
                   sx={{
-                    py: 1.5,
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    borderRadius: '27px',
-                    textTransform: 'none',
+                    width: { xs: '100%', md: '23%' },
+                    height: { xs: 400, md: 380 },
+                    bgcolor: '#E0E0E0',
+                    borderRadius: '15px',
                   }}
                 >
-                  Proceder al pago
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+                  <Skeleton variant="rectangular" width="100%" height="100%" />
+                </Box>
+                <Box
+                  sx={{
+                    width: { xs: '100%', md: '77%' },
+                    height: { xs: 300, md: 380 },
+                    bgcolor: '#E0E0E0',
+                    borderRadius: '15px',
+                    display: { xs: 'none', md: 'block' },
+                  }}
+                >
+                  <Skeleton variant="rectangular" width="100%" height="100%" />
+                </Box>
+              </Box>
+            ))}
       </Box>
+
+      {/* Step 5: Resumen y Pago - Solo visible cuando todo está seleccionado */}
+      {selectedOptions.conditionId &&
+        selectedOptions.modelId &&
+        selectedOptions.storageId &&
+        selectedOptions.colorId && (
+          <Box id="step-5" sx={{ minHeight: '70vh', py: 6 }}>
+            {/* Chip superior */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+              <Box
+                sx={{
+                  borderRadius: '10px',
+                  display: 'flex',
+                  width: 'fit-content',
+                  padding: '10px 37px',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: '#F8F8F8',
+                }}
+              >
+                <Typography
+                  sx={{
+                    color: '#7F746A',
+                    textAlign: 'center',
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    lineHeight: '24px',
+                    letterSpacing: '-0.16px',
+                  }}
+                >
+                  Resultado
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Título */}
+            <Typography
+              sx={{
+                color: '#7F746A',
+                fontSize: '48px',
+                fontWeight: 500,
+                lineHeight: '60px',
+                letterSpacing: '-0.96px',
+                mb: 6,
+                textAlign: 'center',
+              }}
+            >
+              Tu smartphone esta listo
+            </Typography>
+
+            {/* Layout responsive: Mobile columna, Desktop fila */}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: 2,
+              }}
+            >
+              {/* Carrusel izquierda en desktop, arriba en mobile */}
+              <Box sx={{ width: { xs: '100%', md: '50%' } }}>
+                <CheckoutCarousel
+                  images={
+                    product.models?.find((model) => model.id === selectedOptions.modelId)
+                      ?.gallery || [product.thumbnailImage]
+                  }
+                />
+              </Box>
+
+              {/* Resumen derecha en desktop, abajo en mobile */}
+              <Box sx={{ width: { xs: '100%', md: '50%' } }}>
+                <CheckoutSummary
+                  modelName={product.modelo || 'Smartphone'}
+                  condition={product.conditions.find((c) => c.id === selectedOptions.conditionId)!}
+                  storage={product.storage?.find((s) => s.id === selectedOptions.storageId)}
+                  color={product.colors?.find((c) => c.id === selectedOptions.colorId)}
+                  accessories={
+                    selectedOptions.accessoryIds
+                      .map((accId) => {
+                        const accessory = product.accessories?.find((a) => a.id === accId);
+                        const colorId = selectedOptions.accessoryColors[accId];
+                        const selectedColor = accessory?.availableColors.find(
+                          (c) => c.id === colorId
+                        );
+                        if (!accessory || !selectedColor) return null;
+                        return { accessory, selectedColor };
+                      })
+                      .filter(Boolean) as Array<{ accessory: any; selectedColor: any }>
+                  }
+                  totalPrice={totalPrice}
+                  formatPrice={formatPrice}
+                  onRemoveAccessory={(accessoryId) => {
+                    toggleAccessory(accessoryId);
+                  }}
+                  onBuyNow={() => {
+                    // TODO: Implement buy now action
+                    console.log('Comprar ahora');
+                  }}
+                  onAddToCart={() => {
+                    // TODO: Implement add to cart action
+                    console.log('Agregar al carrito');
+                  }}
+                />
+              </Box>
+            </Box>
+          </Box>
+        )}
     </Container>
   );
 }

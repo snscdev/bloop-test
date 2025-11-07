@@ -3,9 +3,30 @@ import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 
 import { CONFIG } from 'src/global-config';
-import { getStorage, KeysLocalStorage } from 'src/store/localStorage';
+import { getStorage, removeStorage, KeysLocalStorage } from 'src/store/localStorage';
 
 // ----------------------------------------------------------------------
+
+// Helper para manejar errores 401 Unauthorized
+const handle401Error = () => {
+  if (typeof window !== 'undefined') {
+    // Guardar la ruta actual para redirección post-login
+    const currentPath = window.location.pathname + window.location.search;
+
+    // Importar dinámicamente el store para evitar problemas de SSR
+    import('src/store/AuthStore').then((module) => {
+      const useAuthStore = module.default;
+      const { setPostLoginRedirectPath } = useAuthStore.getState();
+      setPostLoginRedirectPath(currentPath);
+    });
+
+    // Limpiar token inválido
+    removeStorage(KeysLocalStorage.keyAccessToken);
+
+    // Redirigir al login
+    window.location.href = '/auth/sign-in';
+  }
+};
 
 interface CreateAxiosInstanceProps {
   useBackendUrl?: boolean;
@@ -35,6 +56,15 @@ export const createAxiosInstance = ({ useBackendUrl = true }: CreateAxiosInstanc
   instance.interceptors.response.use(
     (response) => response,
     (error) => {
+      // Detectar error 401 Unauthorized
+      if (error?.response?.status === 401) {
+        const responseData = error?.response?.data;
+        // Verificar si el mensaje es "Unauthorized"
+        if (responseData?.message === 'Unauthorized' || responseData?.statusCode === 401) {
+          handle401Error();
+        }
+      }
+
       const message = error?.response?.data?.message || error?.message || 'Something went wrong!';
       console.error('Axios error:', message);
       return Promise.reject(new Error(message));
@@ -63,6 +93,15 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Detectar error 401 Unauthorized
+    if (error?.response?.status === 401) {
+      const responseData = error?.response?.data;
+      // Verificar si el mensaje es "Unauthorized"
+      if (responseData?.message === 'Unauthorized' || responseData?.statusCode === 401) {
+        handle401Error();
+      }
+    }
+
     const message = error?.response?.data?.message || error?.message || 'Something went wrong!';
     console.error('Axios error:', message);
     return Promise.reject(new Error(message));
@@ -121,5 +160,14 @@ export const endpoints = {
     list: '/api/product/list',
     details: '/api/product/details',
     search: '/api/product/search',
+    // Endpoints del flujo de checkout
+    initial: (id: string) => `/api/v1/products/${id}/initial`,
+    models: (id: string, conditionId: string) =>
+      `/api/v1/products/${id}/conditions/${conditionId}/models`,
+    storage: (id: string, modelId: string, conditionId: string) =>
+      `/api/v1/products/${id}/models/${modelId}/conditions/${conditionId}/storage`,
+    colors: (id: string, storageId: string) => `/api/v1/products/${id}/storage/${storageId}/colors`,
+    accessories: (id: string, colorId: string) =>
+      `/api/v1/products/${id}/colors/${colorId}/accessories`,
   },
 } as const;

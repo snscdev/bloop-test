@@ -47,7 +47,8 @@ type SignupSchemaType = zod.infer<typeof SignupSchema>;
 
 export function CustomSignUpView() {
   const router = useRouter();
-  const { signup, emailRegistered, postLoginRedirectPath } = useAuthStore();
+  const { signup, login, emailRegistered, postLoginRedirectPath, clearPostLoginRedirectPath } =
+    useAuthStore();
   const [errorMsg, setErrorMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -74,17 +75,29 @@ export function CustomSignUpView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       setErrorMsg('');
+      // Crear el usuario
       await signup(data);
 
-      // Validar y redirigir a la ruta deseada
-      let redirectPath = paths.dashboard.root;
+      // Hacer login automático con las credenciales
+      await login(data.email, data.password);
 
-      // Solo usar postLoginRedirectPath si es una ruta válida del dashboard
-      if (postLoginRedirectPath && postLoginRedirectPath.startsWith('/dashboard')) {
+      // Determinar ruta de redirección
+      let redirectPath = paths.selectProduct;
+
+      // Si hay una ruta guardada para post-login, usarla
+      if (postLoginRedirectPath && !postLoginRedirectPath.startsWith('/auth')) {
         redirectPath = postLoginRedirectPath;
+        // Limpiar el path guardado después de usarlo
+        clearPostLoginRedirectPath();
       }
 
+      // Redirigir y recargar para sincronizar AuthContext
       router.push(redirectPath);
+
+      // Pequeño delay para asegurar la navegación antes de recargar
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (error) {
       console.error(error);
       setErrorMsg(error instanceof Error ? error.message : 'Error al registrarse');

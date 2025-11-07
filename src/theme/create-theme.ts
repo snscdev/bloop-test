@@ -33,6 +33,15 @@ export const baseTheme: ThemeOptions = {
       opacity,
     },
   },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1325, // 👈 Cambiado de 1200 (default) a 1280
+      xl: 1536,
+    },
+  },
   mixins,
   components,
   typography,

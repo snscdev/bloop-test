@@ -56,7 +56,7 @@ function Auth0LoginContent() {
       // Obtener el access token
       const accessToken = await getAccessTokenSilently({
         authorizationParams: {
-          audience: 'michin-api',
+          audience: CONFIG.auth0.audience,
         },
       });
 

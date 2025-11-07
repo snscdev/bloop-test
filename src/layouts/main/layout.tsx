@@ -56,10 +56,10 @@ export function MainLayout({
   const navData = slotProps?.nav?.data ?? mainNavData;
 
   // Scroll spy for product pages
-  // Offset ajustado: sticky navbar (54px) + progress bar (48px) = 102px
+  // Offset ajustado: sticky navbar (54px) + progress bar (48px) + margen (20px) = 122px
   const { activeSection, isScrolled } = useScrollSpy({
     sectionIds: ['step-0', 'step-1', 'step-2', 'step-3', 'step-4', 'step-5'],
-    offset: 110,
+    offset: 122,
     throttle: 100,
   });
 

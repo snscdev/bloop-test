@@ -33,6 +33,7 @@ export const paths = {
   minimalStore: 'https://mui.com/store/items/minimal-dashboard/',
   freeUI: 'https://mui.com/store/items/minimal-dashboard-free/',
   figmaUrl: 'https://www.figma.com/design/WadcoP3CSejUDj7YZc87xj/%5BPreview%5D-Minimal-Web.v7.3.0',
+  selectProduct: '/seleccionar-producto',
   product: {
     root: `/product`,
     checkout: `/product/checkout`,

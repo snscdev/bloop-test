@@ -220,3 +220,10 @@ GET /products/{productId}/colors/{colorId}/accessories
 - ✅ Documentación API completa (API_DOCUMENTATION.md)
 
 
+
+
+
+
+
+
+

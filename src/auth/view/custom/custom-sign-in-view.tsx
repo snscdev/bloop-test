@@ -40,7 +40,8 @@ type LoginSchemaType = zod.infer<typeof LoginSchema>;
 
 export function CustomSignInView() {
   const router = useRouter();
-  const { login, emailRegistered, postLoginRedirectPath } = useAuthStore();
+  const { login, emailRegistered, postLoginRedirectPath, clearPostLoginRedirectPath } =
+    useAuthStore();
   const [errorMsg, setErrorMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -62,15 +63,26 @@ export function CustomSignInView() {
       setErrorMsg('');
       await login(data.email, data.password);
 
-      // Validar y redirigir a la ruta deseada
-      let redirectPath = paths.dashboard.root;
+      // Determinar ruta de redirección
+      let redirectPath = paths.selectProduct;
 
-      // Solo usar postLoginRedirectPath si es una ruta válida del dashboard
-      if (postLoginRedirectPath && postLoginRedirectPath.startsWith('/dashboard')) {
-        redirectPath = postLoginRedirectPath;
+      // Si hay una ruta guardada para post-login, usarla
+      if (postLoginRedirectPath) {
+        // Evitar rutas de autenticación en loop
+        if (!postLoginRedirectPath.startsWith('/auth')) {
+          redirectPath = postLoginRedirectPath;
+        }
+        // Limpiar el path guardado después de usarlo
+        clearPostLoginRedirectPath();
       }
 
+      // Redirigir y recargar para sincronizar AuthContext
       router.push(redirectPath);
+
+      // Pequeño delay para asegurar la navegación antes de recargar
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (error) {
       console.error(error);
       setErrorMsg(error instanceof Error ? error.message : 'Error al iniciar sesión');
@@ -96,15 +108,6 @@ export function CustomSignInView() {
 
       <Form methods={methods} onSubmit={onSubmit}>
         <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column' }}>
-          <Field.Text
-            name="email"
-            label="Email"
-            placeholder="ejemplo@correo.com"
-            InputLabelProps={{ shrink: true }}
-            autoComplete="email"
-            disabled
-          />
-
           <Box>
             <Field.Text
               name="password"

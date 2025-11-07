@@ -1,8 +1,9 @@
 'use client';
 
 import { z as zod } from 'zod';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useState, useCallback } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import Box from '@mui/material/Box';
@@ -12,11 +13,14 @@ import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import { useRouter, useSearchParams } from 'src/routes/hooks';
 
+import { CONFIG } from 'src/global-config';
 import useAuthStore from 'src/store/AuthStore';
+import { setStorage, KeysLocalStorage } from 'src/store/localStorage';
 
 import { Form, Field } from 'src/components/hook-form';
+import { Iconify, type IconifyProps } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -33,8 +37,18 @@ type EmailSchemaType = zod.infer<typeof EmailSchema>;
 
 export function CustomValidateEmailView() {
   const router = useRouter();
-  const { validateEmail, setEmailRegistered } = useAuthStore();
+  const searchParams = useSearchParams();
+  const { validateEmail, setEmailRegistered, fetchUser, postLoginRedirectPath } = useAuthStore();
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Auth0 hooks
+  const { loginWithPopup, getAccessTokenSilently } = useAuth0();
+
+  // Verificar si Auth0 está configurado
+  const { domain, clientId, callbackUrl } = CONFIG.auth0;
+  const hasAuth0Config = !!(domain && clientId && callbackUrl);
+
+  const returnTo = searchParams.get('returnTo');
 
   const methods = useForm<EmailSchemaType>({
     resolver: zodResolver(EmailSchema),
@@ -48,6 +62,45 @@ export function CustomValidateEmailView() {
     formState: { isSubmitting },
   } = methods;
 
+  const handleSignInWithGoogle = useCallback(async () => {
+    try {
+      setErrorMsg('');
+      await loginWithPopup({
+        authorizationParams: {
+          connection: 'google-oauth2',
+        },
+      });
+
+      // Obtener el access token
+      const accessToken = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: CONFIG.auth0.audience,
+        },
+      });
+
+      // Guardar token en localStorage
+      setStorage(KeysLocalStorage.keyAccessToken, accessToken);
+
+      // Obtener datos del usuario del backend
+      await fetchUser();
+
+      // Validar y redirigir a la ruta deseada
+      let redirectPath = paths.selectProduct;
+
+      // Usar returnTo si existe
+      if (returnTo) {
+        redirectPath = returnTo;
+      } else if (postLoginRedirectPath && !postLoginRedirectPath.startsWith('/auth')) {
+        redirectPath = postLoginRedirectPath;
+      }
+
+      router.push(redirectPath);
+    } catch (error) {
+      console.error('Error en login con Google:', error);
+      setErrorMsg(error instanceof Error ? error.message : 'Error al iniciar sesión con Google');
+    }
+  }, [loginWithPopup, getAccessTokenSilently, fetchUser, returnTo, postLoginRedirectPath, router]);
+
   const onSubmit = handleSubmit(async (data) => {
     try {
       setErrorMsg('');
@@ -55,8 +108,8 @@ export function CustomValidateEmailView() {
       setEmailRegistered(data.email);
 
       // Redirigir según el provider
-      if (response.provider === 'password') {
-        // Login con contraseña
+      if (response.provider === 'password' || response.provider === 'Username-Password-Authentication') {
+        // Login con contraseña (backend local o Auth0 database)
         router.push(paths.auth.signInPassword);
       } else if (response.provider && response.provider !== 'none') {
         // Cualquier provider social (auth0, google, google-oauth2, etc.)
@@ -72,7 +125,7 @@ export function CustomValidateEmailView() {
   });
 
   return (
-    <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ gap: 2, display: 'flex', flexDirection: 'column' }}>
       <div>
         <Typography variant="h5" sx={{ mb: 1 }}>
           Iniciar sesión
@@ -119,6 +172,25 @@ export function CustomValidateEmailView() {
           </Button>
         </Typography>
       </Box>
+
+      {hasAuth0Config && (
+        <Button
+          fullWidth
+          color="inherit"
+          size="large"
+          variant="outlined"
+          onClick={handleSignInWithGoogle}
+          startIcon={
+            <Iconify
+              icon={'flat-color-icons:google' as IconifyProps['icon']}
+              width={24}
+              sx={{ '& > *': { flexShrink: 0 } }}
+            />
+          }
+        >
+          Iniciar con Google
+        </Button>
+      )}
     </Box>
   );
 }

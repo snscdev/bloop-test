@@ -220,7 +220,7 @@ export function ProductStickyNavbar({ isVisible, sx }: Props) {
             ...(isMobile && { flex: 1, justifyContent: 'space-between' }),
           }}
         >
-          {/* Price with loading indicator */}
+          {/* Price with loading indicator and accessories badge */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {isAnyLoading && <CircularProgress size={16} sx={{ color: '#7F746A' }} />}
             <Typography
@@ -234,6 +234,24 @@ export function ProductStickyNavbar({ isVisible, sx }: Props) {
             >
               {formatPrice(totalPrice)}
             </Typography>
+            {/* Badge de accesorios */}
+            {selectedOptions.accessoryIds.length > 0 && (
+              <Chip
+                label={`+${selectedOptions.accessoryIds.length} ${selectedOptions.accessoryIds.length === 1 ? 'acc.' : 'acc.'}`}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  borderRadius: '10px',
+                  background: '#7F746A',
+                  color: '#FFF',
+                  '& .MuiChip-label': {
+                    px: 0.75,
+                  },
+                }}
+              />
+            )}
           </Box>
 
           {/* Buy button */}

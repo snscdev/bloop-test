@@ -39,7 +39,21 @@ export function AuthGuard({ children }: AuthGuardProps) {
   };
 
   const checkPermissions = async (): Promise<void> => {
+    console.log('🔐 AuthGuard - Estado:', {
+      loading,
+      authenticated,
+      skip: CONFIG.auth.skip,
+      pathname,
+    });
+
     if (loading) {
+      return;
+    }
+
+    // Si skip está activado, permitir acceso sin autenticación
+    if (CONFIG.auth.skip) {
+      console.log('⚠️  AuthGuard - Skip activado, permitiendo acceso');
+      setIsChecking(false);
       return;
     }
 
@@ -49,11 +63,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
       const signInPath = signInPaths[method];
       const redirectPath = createRedirectPath(signInPath);
 
+      console.log('🚫 AuthGuard - No autenticado, redirigiendo a:', redirectPath);
       router.replace(redirectPath);
 
       return;
     }
 
+    console.log('✅ AuthGuard - Usuario autenticado, permitiendo acceso');
     setIsChecking(false);
   };
 

@@ -2,12 +2,10 @@ import type { Breakpoint } from '@mui/material/styles';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Divider from '@mui/material/Divider';
 import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -20,22 +18,12 @@ import { Iconify } from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 const LINKS = [
-  {
-    headline: 'Minimal',
-    children: [
-      { name: 'About us', href: paths.about },
-      { name: 'Contact us', href: paths.contact },
-      { name: 'FAQs', href: paths.faqs },
-    ],
-  },
-  {
-    headline: 'Legal',
-    children: [
-      { name: 'Terms and condition', href: '#' },
-      { name: 'Privacy policy', href: '#' },
-    ],
-  },
-  { headline: 'Contact', children: [{ name: 'support@minimals.cc', href: '#' }] },
+  { name: 'Comprar', href: '/productos' },
+  { name: 'Reparar', href: '/reparacion' },
+  { name: 'Conócenos', href: paths.about },
+  { name: 'Ayuda', href: '/ayuda' },
+  { name: 'Contacto', href: paths.contact },
+  { name: 'FAQs', href: paths.faqs },
 ];
 
 // ----------------------------------------------------------------------
@@ -52,108 +40,95 @@ export function Footer({
   layoutQuery = 'md',
   ...other
 }: FooterProps & { layoutQuery?: Breakpoint }) {
+  const smUp = useMediaQuery((theme) => theme.breakpoints.up('sm'));
   return (
-    <FooterRoot sx={sx} {...other}>
-      <Divider />
-
-      <Container
-        sx={(theme) => ({
-          pb: 5,
-          pt: 10,
-          textAlign: 'center',
-          [theme.breakpoints.up(layoutQuery)]: { textAlign: 'unset' },
-        })}
-      >
-        <Logo />
-
-        <Grid
-          container
-          sx={[
-            (theme) => ({
-              mt: 3,
-              justifyContent: 'center',
-              [theme.breakpoints.up(layoutQuery)]: { justifyContent: 'space-between' },
-            }),
-          ]}
+    <FooterRoot
+      sx={[
+        {
+          maxHeight: { xs: '330px', md: '430px' },
+          overflow: 'hidden',
+          background: '#A49A8F',
+          py: { xs: 6, md: 8 },
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+      {...other}
+    >
+      <Container>
+        {/* Iconos de redes sociales */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 3,
+            mb: 4,
+          }}
         >
-          <Grid size={{ xs: 12, [layoutQuery]: 3 }}>
-            <Typography
-              variant="body2"
-              sx={(theme) => ({
-                mx: 'auto',
-                maxWidth: 280,
-                [theme.breakpoints.up(layoutQuery)]: { mx: 'unset' },
-              })}
+          {_socials.map((social) => (
+            <IconButton
+              key={social.label}
+              sx={{
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
             >
-              The starting point for your next project with Minimal UI Kit, built on the newest
-              version of Material-UI ©, ready to be customized to your style.
-            </Typography>
+              {social.value === 'twitter' && <Iconify icon="socials:twitter" width={24} />}
+              {social.value === 'facebook' && <Iconify icon="socials:facebook" width={24} />}
+              {social.value === 'instagram' && <Iconify icon="socials:instagram" width={24} />}
+              {social.value === 'linkedin' && <Iconify icon="socials:linkedin" width={24} />}
+            </IconButton>
+          ))}
+        </Box>
 
-            <Box
-              sx={(theme) => ({
-                mt: 3,
-                mb: 5,
-                display: 'flex',
-                justifyContent: 'center',
-                [theme.breakpoints.up(layoutQuery)]: { mb: 0, justifyContent: 'flex-start' },
-              })}
+        {/* Enlaces de navegación */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: { xs: 2, md: 4 },
+            mb: 6,
+          }}
+        >
+          {LINKS.map((link) => (
+            <Link
+              key={link.name}
+              component={RouterLink}
+              href={link.href}
+              underline="none"
+              sx={{
+                color: 'white',
+                fontSize: { xs: '14px', md: '16px' },
+                fontWeight: 400,
+                transition: 'opacity 0.2s',
+                '&:hover': {
+                  opacity: 0.8,
+                },
+              }}
             >
-              {_socials.map((social) => (
-                <IconButton key={social.label}>
-                  {social.value === 'twitter' && <Iconify icon="socials:twitter" />}
-                  {social.value === 'facebook' && <Iconify icon="socials:facebook" />}
-                  {social.value === 'instagram' && <Iconify icon="socials:instagram" />}
-                  {social.value === 'linkedin' && <Iconify icon="socials:linkedin" />}
-                </IconButton>
-              ))}
-            </Box>
-          </Grid>
+              {link.name}
+            </Link>
+          ))}
+        </Box>
 
-          <Grid size={{ xs: 12, [layoutQuery]: 6 }}>
-            <Box
-              sx={(theme) => ({
-                gap: 5,
-                display: 'flex',
-                flexDirection: 'column',
-                [theme.breakpoints.up(layoutQuery)]: { flexDirection: 'row' },
-              })}
-            >
-              {LINKS.map((list) => (
-                <Box
-                  key={list.headline}
-                  sx={(theme) => ({
-                    gap: 2,
-                    width: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                    [theme.breakpoints.up(layoutQuery)]: { alignItems: 'flex-start' },
-                  })}
-                >
-                  <Typography component="div" variant="overline">
-                    {list.headline}
-                  </Typography>
-
-                  {list.children.map((link) => (
-                    <Link
-                      key={link.name}
-                      component={RouterLink}
-                      href={link.href}
-                      color="inherit"
-                      variant="body2"
-                    >
-                      {link.name}
-                    </Link>
-                  ))}
-                </Box>
-              ))}
-            </Box>
-          </Grid>
-        </Grid>
-
-        <Typography variant="body2" sx={{ mt: 10 }}>
-          © All rights reserved.
-        </Typography>
+        {/* Logo grande centrado */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            position: 'relative',
+            top: { xs: 60, md: -60 },
+          }}
+        >
+          <Logo
+            isSingle={false}
+            color="white"
+            width={smUp ? 1000 : 200}
+            height={smUp ? 400 : 120}
+          />
+        </Box>
       </Container>
     </FooterRoot>
   );
