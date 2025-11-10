@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import Typography from '@mui/material/Typography';
 import CardActionArea from '@mui/material/CardActionArea';
 
 import { useRouter, usePathname } from 'src/routes/hooks';
+
+import { useProductCheckoutStore } from 'src/store/product-checkout-store';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -26,6 +29,12 @@ export function NavMobile({ onClose }: NavMobileProps) {
   const pathname = usePathname();
   const [comprarExpanded, setComprarExpanded] = useState(false);
   const [initialPathname] = useState(pathname);
+  const { product, createPaymentSession } = useProductCheckoutStore((state) => ({
+    product: state.product,
+    createPaymentSession: state.createPaymentSession,
+  }));
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   useEffect(() => {
     // Solo cerrar si el pathname cambió (navegación), no en el montaje inicial
@@ -38,6 +47,37 @@ export function NavMobile({ onClose }: NavMobileProps) {
   const handleNavigate = (path: string) => {
     router.push(path);
     onClose();
+  };
+
+  const handleBuyNow = async () => {
+    if (paymentLoading || !product) {
+      if (!product) {
+        setPaymentError('Selecciona un producto antes de continuar.');
+      }
+      return;
+    }
+
+    if (typeof window === 'undefined') return;
+
+    try {
+      setPaymentLoading(true);
+      setPaymentError(null);
+
+      const origin = window.location.origin;
+      const paymentUrl = await createPaymentSession({
+        successUrl: `https://bloop-test.vercel.app`, //`${origin}/success`,
+        cancelUrl: `https://bloop-test.vercel.app`, //`${origin}/cancel`,
+      });
+
+      window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+      onClose();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Ocurrió un error al procesar el pago.';
+      setPaymentError(message);
+    } finally {
+      setPaymentLoading(false);
+    }
   };
 
   const navItems = [
@@ -206,6 +246,43 @@ export function NavMobile({ onClose }: NavMobileProps) {
           </Box>
         ))}
       </Box>
+
+      {product && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 3 }}>
+          <Button
+            variant="contained"
+            onClick={handleBuyNow}
+            disabled={paymentLoading}
+            sx={{
+              height: 48,
+              borderRadius: '27px',
+              background: '#7F746A',
+              color: '#FFF',
+              fontSize: '16px',
+              fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': {
+                background: '#6A6359',
+              },
+            }}
+          >
+            {paymentLoading ? 'Procesando...' : 'Comprar ahora'}
+          </Button>
+
+          {paymentError && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'error.main',
+                fontSize: '12px',
+                fontWeight: 500,
+              }}
+            >
+              {paymentError}
+            </Typography>
+          )}
+        </Box>
+      )}
     </Box>
   );
 }

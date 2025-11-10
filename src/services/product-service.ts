@@ -14,6 +14,72 @@ import { createAxiosInstance } from 'src/lib/axios';
 
 const axiosInstance = createAxiosInstance({ useBackendUrl: true });
 
+// Tipos auxiliares para validación de inventario
+export type ValidateInventoryPayload = {
+  conditionId: string;
+  modelId: string;
+  storageId?: string;
+  colorId?: string;
+  quantity: number;
+};
+
+export type ValidateInventoryResponse = {
+  available: boolean;
+  variantId?: string;
+  locationId?: string;
+  price?: number;
+  stock?: number;
+  reserved?: number;
+  availableQuantity?: number;
+};
+
+// Tipos para creación de sesiones de pago
+export type PaymentSessionItem = {
+  variantId: string;
+  quantity: number;
+  productName: string;
+  price: number;
+};
+
+export type CreatePaymentSessionPayload = {
+  items: PaymentSessionItem[];
+  locationId?: string;
+  amount: number;
+  currency: string;
+  productName: string;
+  successUrl: string;
+  cancelUrl: string;
+  metadata?: Record<string, string>;
+};
+
+export type CreatePaymentSessionResponse = {
+  id: string;
+  externalId: string;
+  amount: number;
+  currency: string;
+  productName: string;
+  successUrl: string;
+  cancelUrl: string;
+  appName: string;
+  userId: string;
+  userEmail: string;
+  status: string;
+  metadata?: Record<string, string>;
+  paymentUrl: string;
+  locationId?: string;
+  items: Array<{
+    id: string;
+    variantId: string;
+    quantity: number;
+    price: number;
+    productName: string;
+    locationId?: string;
+  }>;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 /**
  * Obtiene los datos iniciales de un producto
  * GET /products/{productId}/initial
@@ -94,6 +160,35 @@ export const fetchAccessories = async (
         storageId,
       },
     }
+  );
+  return response.data;
+};
+
+/**
+ * Valida inventario para las opciones seleccionadas del usuario
+ * POST /products/{productHandle}/validate-inventory
+ */
+export const validateProductInventory = async (
+  productHandle: string,
+  payload: ValidateInventoryPayload
+): Promise<ValidateInventoryResponse> => {
+  const response = await axiosInstance.post<ValidateInventoryResponse>(
+    `/products/${productHandle}/validate-inventory`,
+    payload
+  );
+  return response.data;
+};
+
+/**
+ * Crea una sesión de pago
+ * POST /payment-sessions/create
+ */
+export const createPaymentSession = async (
+  payload: CreatePaymentSessionPayload
+): Promise<CreatePaymentSessionResponse> => {
+  const response = await axiosInstance.post<CreatePaymentSessionResponse>(
+    '/payment-sessions/create',
+    payload
   );
   return response.data;
 };

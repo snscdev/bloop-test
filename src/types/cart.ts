@@ -2,9 +2,41 @@
 
 export type CartItemType = 'producto' | 'servicio';
 
+export type CartAccessoryOption = {
+  id: string;
+  name: string;
+  color?: {
+    id: string;
+    name: string;
+    value?: string;
+  };
+};
+
+export type CartItemOptions = {
+  condition?: {
+    id: string;
+    name: string;
+  };
+  model?: {
+    id: string;
+    name: string;
+  };
+  storage?: {
+    id: string;
+    name: string;
+  };
+  color?: {
+    id: string;
+    name: string;
+    value?: string;
+  };
+  accessories?: CartAccessoryOption[];
+};
+
 export type CartItem = {
   id: string;
   type: CartItemType;
+  productId?: string;
   marca?: string; // Solo para productos
   modelo?: string; // Solo para productos
   servicio?: string; // Solo para servicios
@@ -12,6 +44,7 @@ export type CartItem = {
   precio: number;
   cantidad: number; // Siempre 1 para servicios
   imagen?: string;
+  options?: CartItemOptions;
 };
 
 export type Cart = {

@@ -133,6 +133,7 @@ type ProductCheckoutState = {
   setAccessoryColor: (accessoryId: string, colorId: string) => void;
   setCurrentStep: (step: number) => void;
   calculateTotalPrice: () => number;
+  createPaymentSession: (params: { successUrl: string; cancelUrl: string }) => Promise<string>;
   reset: () => void;
 };
 
@@ -513,6 +514,82 @@ export const useProductCheckoutStore = create<ProductCheckoutState>((set, get) =
 
     set({ totalPrice: total });
     return total;
+  },
+
+  createPaymentSession: async ({ successUrl, cancelUrl }) => {
+    const state = get();
+    const { product, selectedOptions } = state;
+
+    if (!product) throw new Error('Producto no disponible.');
+
+    const { conditionId, modelId, storageId, colorId } = selectedOptions;
+    if (!conditionId || !modelId) {
+      throw new Error('Selecciona un estado y un modelo antes de continuar.');
+    }
+
+    const selectedCondition = product.conditions?.find((c) => c.id === conditionId);
+    const selectedModel = product.models?.find((m) => m.id === modelId);
+    const selectedStorage = storageId ? product.storage?.find((s) => s.id === storageId) : null;
+    const selectedColor = colorId ? product.colors?.find((c) => c.id === colorId) : null;
+
+    // Recalcular total para asegurar datos frescos
+    const recalculatedTotal = get().calculateTotalPrice();
+    const baseTotal = recalculatedTotal || state.totalPrice;
+    if (!baseTotal) {
+      throw new Error('No se pudo calcular el total del pedido.');
+    }
+
+    const quantity = 1;
+
+    const inventoryValidation = await productService.validateProductInventory(product.id, {
+      conditionId,
+      modelId,
+      storageId: storageId || undefined,
+      colorId: colorId || undefined,
+      quantity,
+    });
+
+    if (!inventoryValidation.available || !inventoryValidation.variantId) {
+      throw new Error('No hay inventario disponible para esta configuración.');
+    }
+
+    const itemPrice = inventoryValidation.price ?? baseTotal;
+    const locationId = inventoryValidation.locationId;
+
+    const detailedProductName = [
+      product.modelo,
+      selectedModel?.name,
+      selectedStorage?.name,
+      selectedColor?.name,
+      selectedCondition?.name,
+    ]
+      .filter(Boolean)
+      .join(' - ');
+
+    const paymentPayload = {
+      items: [
+        {
+          variantId: inventoryValidation.variantId,
+          quantity,
+          productName: detailedProductName || product.modelo,
+          price: itemPrice,
+        },
+      ],
+      locationId,
+      amount: itemPrice * quantity,
+      currency: 'ARS',
+      productName: product.modelo,
+      successUrl,
+      cancelUrl,
+    };
+
+    const paymentSession = await productService.createPaymentSession(paymentPayload);
+
+    if (!paymentSession.paymentUrl) {
+      throw new Error('No se pudo iniciar la sesión de pago.');
+    }
+
+    return paymentSession.paymentUrl;
   },
 
   reset: () => {

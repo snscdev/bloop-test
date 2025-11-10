@@ -84,8 +84,8 @@ export function ModelCard({
               transform: 'translateX(-50%) scale(1.09)',
             },
             '& .blur-overlay': {
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
+              backdropFilter: 'blur(0px)',
+              WebkitBackdropFilter: 'blur(0px)',
             },
           },
         }}
@@ -125,8 +125,8 @@ export function ModelCard({
             background: 'transparent',
             maskImage: 'linear-gradient(to top, black 0%, transparent 60%)',
             WebkitMaskImage: 'linear-gradient(to top, black 0%, transparent 60%)',
-            backdropFilter: 'blur(0px)',
-            WebkitBackdropFilter: 'blur(0px)',
+            backdropFilter: 'blur(30px)',
+            WebkitBackdropFilter: 'blur(30px)',
             transition:
               'backdrop-filter 0.4s ease-in-out, -webkit-backdrop-filter 0.4s ease-in-out',
           }}

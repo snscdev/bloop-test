@@ -33,6 +33,9 @@ type CheckoutSummaryProps = {
   onRemoveAccessory: (accessoryId: string) => void;
   onBuyNow: () => void;
   onAddToCart: () => void;
+  isProcessingPayment?: boolean;
+  paymentError?: string | null;
+  isAddToCartDisabled?: boolean;
 };
 
 export function CheckoutSummary({
@@ -46,6 +49,9 @@ export function CheckoutSummary({
   onRemoveAccessory,
   onBuyNow,
   onAddToCart,
+  isProcessingPayment = false,
+  paymentError = null,
+  isAddToCartDisabled = false,
 }: CheckoutSummaryProps) {
   // Determinar texto del total según cantidad de accesorios
   const getTotalText = () => {
@@ -254,6 +260,7 @@ export function CheckoutSummary({
           variant="contained"
           fullWidth
           onClick={onBuyNow}
+          disabled={isProcessingPayment}
           sx={{
             height: 48,
             borderRadius: '27px',
@@ -267,12 +274,13 @@ export function CheckoutSummary({
             },
           }}
         >
-          Comprar ahora
+          {isProcessingPayment ? 'Procesando...' : 'Comprar ahora'}
         </Button>
         <Button
           variant="outlined"
           fullWidth
           onClick={onAddToCart}
+          disabled={isAddToCartDisabled}
           sx={{
             height: 48,
             borderRadius: '27px',
@@ -290,6 +298,19 @@ export function CheckoutSummary({
           Agregar al carrito
         </Button>
       </Box>
+
+      {paymentError && (
+        <Typography
+          sx={{
+            fontSize: '13px',
+            fontWeight: 500,
+            color: 'error.main',
+            mb: 2,
+          }}
+        >
+          {paymentError}
+        </Typography>
+      )}
 
       {/* Viene con */}
       <Box sx={{ mb: 2 }}>

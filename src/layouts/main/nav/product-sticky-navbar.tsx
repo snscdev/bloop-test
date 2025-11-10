@@ -2,6 +2,8 @@
 
 import type { Theme, SxProps } from '@mui/material/styles';
 
+import { useState } from 'react';
+
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
@@ -23,7 +25,10 @@ export function ProductStickyNavbar({ isVisible, sx }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const { product, selectedOptions, totalPrice, loadingStates } = useProductCheckoutStore();
+  const { product, selectedOptions, totalPrice, loadingStates, createPaymentSession } =
+    useProductCheckoutStore();
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   if (!product) return null;
 
@@ -43,9 +48,28 @@ export function ProductStickyNavbar({ isVisible, sx }: Props) {
   const selectedStorage = product.storage?.find((s) => s.id === selectedOptions.storageId);
   const selectedColor = product.colors?.find((c) => c.id === selectedOptions.colorId);
 
-  const handleBuyNow = () => {
-    // TODO: Implement buy now action
-    console.log('Comprar ahora');
+  const handleBuyNow = async () => {
+    if (paymentLoading) return;
+    if (typeof window === 'undefined') return;
+
+    try {
+      setPaymentLoading(true);
+      setPaymentError(null);
+
+      const origin = window.location.origin;
+      const paymentUrl = await createPaymentSession({
+        successUrl: `https://bloop-test.vercel.app`, //`${origin}/success`,
+        cancelUrl: `https://bloop-test.vercel.app`, //`${origin}/cancel`,
+      });
+
+      window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Ocurrió un error al procesar el pago.';
+      setPaymentError(message);
+    } finally {
+      setPaymentLoading(false);
+    }
   };
 
   return (
@@ -258,6 +282,7 @@ export function ProductStickyNavbar({ isVisible, sx }: Props) {
           <Button
             variant="contained"
             onClick={handleBuyNow}
+            disabled={paymentLoading}
             sx={{
               height: 40,
               px: 3,
@@ -273,10 +298,28 @@ export function ProductStickyNavbar({ isVisible, sx }: Props) {
               },
             }}
           >
-            Comprar ahora
+            {paymentLoading ? 'Procesando...' : 'Comprar ahora'}
           </Button>
         </Box>
       </Box>
+      {paymentError && (
+        <Box
+          sx={{
+            px: { xs: 2, md: 7 },
+            pb: 1,
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'error.main',
+              fontWeight: 500,
+            }}
+          >
+            {paymentError}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }
