@@ -16,6 +16,7 @@ type AccessoryGalleryProps = {
   availableColors: ColorOption[];
   selectedColorId: string;
   onColorSelect: (colorId: string) => void;
+  isLoaded?: boolean;
 };
 
 export function AccessoryGallery({
@@ -23,6 +24,7 @@ export function AccessoryGallery({
   availableColors,
   selectedColorId,
   onColorSelect,
+  isLoaded = true,
 }: AccessoryGalleryProps) {
   const carousel = useCarousel({
     loop: true,
@@ -60,6 +62,7 @@ export function AccessoryGallery({
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
+                  filter: isLoaded ? 'none' : 'grayscale(100%) brightness(1.1)',
                 }}
               />
             </Box>

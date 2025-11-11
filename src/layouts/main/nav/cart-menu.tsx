@@ -95,6 +95,10 @@ export function CartMenu({ anchorEl, open, onClose }: Props) {
       <Box
         sx={{
           p: { xs: 2.5, sm: 3 },
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: { xs: 'calc(100vh - 160px)', sm: 540 },
+          minHeight: hasItems ? 0 : 'auto',
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -114,189 +118,207 @@ export function CartMenu({ anchorEl, open, onClose }: Props) {
         </Box>
 
         {hasItems ? (
-          <>
-            <Stack spacing={2.5} sx={{ mb: 3 }}>
-              {cart.items.map((item) => {
-                const optionHighlights = [
-                  item.options?.condition?.name,
-                  item.options?.storage?.name,
-                  item.options?.color?.name,
-                ]
-                  .filter(Boolean)
-                  .join(' · ');
+          <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
+            <Box
+              sx={{
+                flexGrow: 1,
+                overflowY: 'auto',
+                pr: 1,
+                mr: -1,
+                mb: 3,
+              }}
+            >
+              <Stack spacing={2.5}>
+                {cart.items.map((item) => {
+                  const isService = item.type === 'servicio';
+                  
+                  const optionHighlights = [
+                    item.options?.condition?.name,
+                    item.options?.storage?.name,
+                    item.options?.color?.name,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ');
 
-                const accessoriesSummary = item.options?.accessories
-                  ?.map((accessory) =>
-                    accessory.color?.name
-                      ? `${accessory.name} (${accessory.color.name})`
-                      : accessory.name
-                  )
-                  .join(', ');
+                  // Solo mostrar accesorios si NO es un servicio
+                  const accessoriesSummary = !isService
+                    ? item.options?.accessories
+                        ?.map((accessory) =>
+                          accessory.color?.name
+                            ? `${accessory.name} (${accessory.color.name})`
+                            : accessory.name
+                        )
+                        .join(', ')
+                    : undefined;
 
-                return (
-                  <Box
-                    key={item.id}
-                    onClick={handleNavigateToCart}
-                    sx={{
-                      background: '#FFFFFF',
-                      px: 2.5,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 1.5,
-                      cursor: 'pointer',
-                      borderBottom: '1px solid #EFECE9',
-                      '&:last-child': {
-                        borderBottom: 'none',
-                      },
-                      py: 2,
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Box
-                        component="img"
-                        src={item.imagen}
-                        alt={item.nombre}
-                        sx={{
-                          width: 72,
-                          height: 72,
-                          borderRadius: '16px',
-                          objectFit: 'cover',
-                          backgroundColor: '#F0F0F0',
-                          flexShrink: 0,
-                        }}
-                      />
-
-                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                        <Typography
-                          sx={{
-                            fontSize: '18px',
-                            fontWeight: 600,
-                            color: '#7F746A',
-                            mb: 0.5,
-                            overflow: 'hidden',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                          }}
-                        >
-                          {item.nombre}
-                        </Typography>
-
-                        {optionHighlights && (
-                          <Typography
-                            sx={{
-                              fontSize: '13px',
-                              fontWeight: 500,
-                              color: '#A49A8F',
-                            }}
-                          >
-                            {optionHighlights}
-                          </Typography>
-                        )}
-
-                        {accessoriesSummary && (
-                          <Typography
-                            sx={{
-                              fontSize: '12px',
-                              fontWeight: 500,
-                              color: '#C0B8B0',
-                              mt: 0.5,
-                            }}
-                          >
-                            Accesorios: {accessoriesSummary}
-                          </Typography>
-                        )}
-                      </Box>
-
-                      <Typography
-                        sx={{
-                          fontSize: '16px',
-                          fontWeight: 600,
-                          color: '#7F746A',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {formatPrice(item.precio * item.cantidad)}
-                      </Typography>
-                    </Box>
-
+                  return (
                     <Box
+                      key={item.id}
+                      onClick={handleNavigateToCart}
                       sx={{
+                        background: '#FFFFFF',
+                        px: 2.5,
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        gap: 1,
+                        flexDirection: 'column',
+                        gap: 1.5,
+                        cursor: 'pointer',
+                        borderBottom: '1px solid #EFECE9',
+                        '&:last-child': {
+                          borderBottom: 'none',
+                        },
+                        py: 2,
                       }}
                     >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box
+                          component="img"
+                          src={item.imagen}
+                          alt={item.nombre}
+                          sx={{
+                            width: 72,
+                            height: 72,
+                            borderRadius: '16px',
+                            objectFit: 'cover',
+                            backgroundColor: '#F0F0F0',
+                            flexShrink: 0,
+                          }}
+                        />
+
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography
+                            sx={{
+                              fontSize: '18px',
+                              fontWeight: 600,
+                              color: '#7F746A',
+                              mb: 0.5,
+                              overflow: 'hidden',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                            }}
+                          >
+                            {item.nombre}
+                          </Typography>
+
+                          {optionHighlights && (
+                            <Typography
+                              sx={{
+                                fontSize: '13px',
+                                fontWeight: 500,
+                                color: '#A49A8F',
+                              }}
+                            >
+                              {optionHighlights}
+                            </Typography>
+                          )}
+
+                          {accessoriesSummary && (
+                            <Typography
+                              sx={{
+                                fontSize: '12px',
+                                fontWeight: 500,
+                                color: '#C0B8B0',
+                                mt: 0.5,
+                              }}
+                            >
+                              Accesorios: {accessoriesSummary}
+                            </Typography>
+                          )}
+                        </Box>
+
+                        <Typography
+                          sx={{
+                            fontSize: '16px',
+                            fontWeight: 600,
+                            color: '#7F746A',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {formatPrice(item.precio * item.cantidad)}
+                        </Typography>
+                      </Box>
+
                       <Box
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
+                          justifyContent: 'flex-end',
                           gap: 1,
-                          background: '#F4F1EE',
-                          borderRadius: '999px',
-                          px: 1,
-                          py: 0.5,
                         }}
                       >
-                        <IconButton
-                          size="small"
-                          onClick={(event) => handleDecrease(event, item.id, item.cantidad)}
-                          sx={{
-                            width: 28,
-                            height: 28,
-                            color: '#7F746A',
-                          }}
-                        >
-                          <Iconify icon="mdi:minus" width={18} />
-                        </IconButton>
+                        {/* Solo mostrar contador si NO es un servicio */}
+                        {!isService && (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                              background: '#F4F1EE',
+                              borderRadius: '999px',
+                              px: 1,
+                              py: 0.5,
+                            }}
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={(event) => handleDecrease(event, item.id, item.cantidad)}
+                              sx={{
+                                width: 28,
+                                height: 28,
+                                color: '#7F746A',
+                              }}
+                            >
+                              <Iconify icon="mdi:minus" width={18} />
+                            </IconButton>
 
-                        <Typography
-                          sx={{
-                            fontSize: '15px',
-                            fontWeight: 600,
-                            color: '#7F746A',
-                            minWidth: 20,
-                            textAlign: 'center',
-                          }}
-                        >
-                          {item.cantidad}
-                        </Typography>
+                            <Typography
+                              sx={{
+                                fontSize: '15px',
+                                fontWeight: 600,
+                                color: '#7F746A',
+                                minWidth: 20,
+                                textAlign: 'center',
+                              }}
+                            >
+                              {item.cantidad}
+                            </Typography>
+
+                            <IconButton
+                              size="small"
+                              onClick={(event) => handleIncrease(event, item.id, item.cantidad)}
+                              sx={{
+                                width: 28,
+                                height: 28,
+                                color: '#7F746A',
+                              }}
+                            >
+                              <Iconify icon="mdi:plus" width={18} />
+                            </IconButton>
+                          </Box>
+                        )}
 
                         <IconButton
-                          size="small"
-                          onClick={(event) => handleIncrease(event, item.id, item.cantidad)}
+                          onClick={(event) => handleRemove(event, item.id)}
                           sx={{
-                            width: 28,
-                            height: 28,
-                            color: '#7F746A',
+                            width: 32,
+                            height: 32,
+                            borderRadius: '12px',
+                            background: '#F4F1EE',
+                            color: '#B0A79E',
+                            '&:hover': {
+                              background: '#E3DDD7',
+                              color: '#7F746A',
+                            },
                           }}
                         >
-                          <Iconify icon="mdi:plus" width={18} />
+                          <Iconify icon="mdi:trash-can-outline" width={18} />
                         </IconButton>
                       </Box>
-
-                      <IconButton
-                        onClick={(event) => handleRemove(event, item.id)}
-                        sx={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: '12px',
-                          background: '#F4F1EE',
-                          color: '#B0A79E',
-                          '&:hover': {
-                            background: '#E3DDD7',
-                            color: '#7F746A',
-                          },
-                        }}
-                      >
-                        <Iconify icon="mdi:trash-can-outline" width={18} />
-                      </IconButton>
                     </Box>
-                  </Box>
-                );
-              })}
-            </Stack>
+                  );
+                })}
+              </Stack>
+            </Box>
 
             <Divider sx={{ borderColor: '#E5E1DC', mb: 3 }} />
 
@@ -347,7 +369,7 @@ export function CartMenu({ anchorEl, open, onClose }: Props) {
             >
               Ver carrito
             </Button>
-          </>
+          </Box>
         ) : (
           <Box
             sx={{

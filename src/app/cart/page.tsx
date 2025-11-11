@@ -224,13 +224,18 @@ export default function CartPage() {
             <Box sx={{ flex: 1, maxWidth: { xs: '100%', md: '60%' } }}>
               <Stack spacing={3}>
                 {cart.items.map((item) => {
-                  const accessoriesSummary = item.options?.accessories
-                    ?.map((accessory) =>
-                      accessory.color?.name
-                        ? `${accessory.name} (${accessory.color.name})`
-                        : accessory.name
-                    )
-                    .join(', ');
+                  const isService = item.type === 'servicio';
+
+                  // Solo mostrar accesorios si NO es un servicio
+                  const accessoriesSummary = !isService
+                    ? item.options?.accessories
+                        ?.map((accessory) =>
+                          accessory.color?.name
+                            ? `${accessory.name} (${accessory.color.name})`
+                            : accessory.name
+                        )
+                        .join(', ')
+                    : undefined;
 
                   const conditionName = item.options?.condition?.name;
                   const storageName = item.options?.storage?.name;
@@ -291,7 +296,7 @@ export default function CartPage() {
                                 color: '#B6ACA3',
                               }}
                             >
-                              PRODUCTO
+                              {isService ? 'SERVICIO' : 'PRODUCTO'}
                             </Typography>
 
                             <Box
@@ -465,58 +470,61 @@ export default function CartPage() {
                         <Box
                           sx={{
                             display: 'flex',
-                            justifyContent: 'space-between',
+                            justifyContent: isService ? 'flex-end' : 'space-between',
                             alignItems: 'center',
                             mt: 'auto',
                             flexWrap: 'wrap',
                             gap: 2,
                           }}
                         >
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 1,
-                              background: '#F4F1EE',
-                              borderRadius: '999px',
-                              px: 1.5,
-                              py: 0.5,
-                            }}
-                          >
-                            <IconButton
-                              onClick={(event) => handleDecrease(event, item.id, item.cantidad)}
+                          {/* Solo mostrar contador si NO es un servicio */}
+                          {!isService && (
+                            <Box
                               sx={{
-                                width: 32,
-                                height: 32,
-                                color: '#7F746A',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                                background: '#F4F1EE',
+                                borderRadius: '999px',
+                                px: 1.5,
+                                py: 0.5,
                               }}
                             >
-                              <Iconify icon="mdi:minus" width={20} />
-                            </IconButton>
+                              <IconButton
+                                onClick={(event) => handleDecrease(event, item.id, item.cantidad)}
+                                sx={{
+                                  width: 32,
+                                  height: 32,
+                                  color: '#7F746A',
+                                }}
+                              >
+                                <Iconify icon="mdi:minus" width={20} />
+                              </IconButton>
 
-                            <Typography
-                              sx={{
-                                fontSize: '16px',
-                                fontWeight: 600,
-                                color: '#7F746A',
-                                minWidth: 20,
-                                textAlign: 'center',
-                              }}
-                            >
-                              {item.cantidad}
-                            </Typography>
+                              <Typography
+                                sx={{
+                                  fontSize: '16px',
+                                  fontWeight: 600,
+                                  color: '#7F746A',
+                                  minWidth: 20,
+                                  textAlign: 'center',
+                                }}
+                              >
+                                {item.cantidad}
+                              </Typography>
 
-                            <IconButton
-                              onClick={(event) => handleIncrease(event, item.id, item.cantidad)}
-                              sx={{
-                                width: 32,
-                                height: 32,
-                                color: '#7F746A',
-                              }}
-                            >
-                              <Iconify icon="mdi:plus" width={20} />
-                            </IconButton>
-                          </Box>
+                              <IconButton
+                                onClick={(event) => handleIncrease(event, item.id, item.cantidad)}
+                                sx={{
+                                  width: 32,
+                                  height: 32,
+                                  color: '#7F746A',
+                                }}
+                              >
+                                <Iconify icon="mdi:plus" width={20} />
+                              </IconButton>
+                            </Box>
+                          )}
 
                           <IconButton
                             onClick={(event) => handleRemove(event, item.id)}
@@ -546,6 +554,9 @@ export default function CartPage() {
               sx={{
                 width: { xs: '100%', md: '40%' },
                 flexShrink: 0,
+                position: { xs: 'relative', md: 'sticky' },
+                top: { md: 100 },
+                alignSelf: 'flex-start',
               }}
             >
               <Card

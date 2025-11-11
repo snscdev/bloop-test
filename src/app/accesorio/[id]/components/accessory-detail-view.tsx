@@ -6,6 +6,7 @@ import type {
   AccessoryBrandOption,
   AccessoryModelOption,
   AccessoryColorOption,
+  AccessoryBrandVariant,
 } from 'src/types/accessory';
 
 import { useRouter } from 'next/navigation';
@@ -23,10 +24,15 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import ButtonBase from '@mui/material/ButtonBase';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { useCart } from 'src/hooks/use-cart';
 
-import { getAccessoryVariant, getAccessoryDefaultSelections } from 'src/services/accessory-service';
+import {
+  getAccessoryVariant,
+  getAccessoryBrandVariant,
+  getAccessoryDefaultSelections,
+} from 'src/services/accessory-service';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -58,8 +64,6 @@ export function AccessoryDetailView({ accessory }: Props) {
   const router = useRouter();
   const { addItem } = useCart();
 
-  const { brandOptions, colorOptions } = accessory;
-
   const defaults = useMemo(() => getAccessoryDefaultSelections(accessory), [accessory]);
 
   const [selectedBrandId, setSelectedBrandId] = useState(defaults.brandId);
@@ -67,13 +71,30 @@ export function AccessoryDetailView({ accessory }: Props) {
   const [selectedColorId, setSelectedColorId] = useState(defaults.colorId);
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [loadingBrandVariant, setLoadingBrandVariant] = useState(false);
+  const [currentBrandVariant, setCurrentBrandVariant] = useState<AccessoryBrandVariant | null>(
+    defaults.brandVariant ?? null
+  );
+
+  // Usar datos de currentBrandVariant en lugar de accessory directamente
+  const colorOptions = currentBrandVariant?.colorOptions ?? [];
+  const modelOptions = currentBrandVariant?.models ?? [];
+  const brandOptions: AccessoryBrandOption[] = useMemo(
+    () =>
+      accessory.brandVariants.map((bv) => ({
+        id: bv.brandId,
+        name: bv.brandName,
+        slug: bv.brandSlug,
+        models: bv.models,
+      })),
+    [accessory.brandVariants]
+  );
 
   const selectedBrand = useMemo(
     () => getBrandOptionById(brandOptions, selectedBrandId) ?? brandOptions[0],
     [brandOptions, selectedBrandId]
   );
-
-  const modelOptions = useMemo(() => selectedBrand?.models ?? [], [selectedBrand]);
 
   const selectedModel = useMemo(
     () => getModelOptionById(modelOptions, selectedModelId) ?? modelOptions[0],
@@ -87,16 +108,19 @@ export function AccessoryDetailView({ accessory }: Props) {
 
   const activeVariant = useMemo(
     () =>
-      selectedColor ? getAccessoryVariant(accessory, selectedColor.id) : accessory.variants[0],
-    [accessory, selectedColor]
+      selectedColor && currentBrandVariant
+        ? getAccessoryVariant(currentBrandVariant, selectedColor.id)
+        : currentBrandVariant?.variants[0],
+    [currentBrandVariant, selectedColor]
   );
 
   const galleryImages = activeVariant?.images.length
     ? activeVariant.images
-    : (accessory.gallery ?? []);
+    : (currentBrandVariant?.gallery ?? []);
 
   const maxQuantity = activeVariant?.stock ?? 1;
   const isOutOfStock = (activeVariant?.stock ?? 0) <= 0;
+  const currentPrice = activeVariant?.price ?? currentBrandVariant?.price ?? 0;
 
   useEffect(() => {
     if (selectedBrand && !modelOptions.some((model) => model.id === selectedModelId)) {
@@ -121,6 +145,32 @@ export function AccessoryDetailView({ accessory }: Props) {
     setQuantity((prev) => Math.min(prev, Math.max(1, maxQuantity)));
   }, [maxQuantity]);
 
+  // Función para cargar variante de marca
+  const loadBrandVariant = useCallback(
+    async (brandId: string) => {
+      setLoadingBrandVariant(true);
+      try {
+        const variant = await getAccessoryBrandVariant(accessory.id, brandId);
+        if (variant) {
+          setCurrentBrandVariant(variant);
+          // Reset selecciones
+          setSelectedColorId(variant.colorOptions[0]?.id ?? '');
+          setActiveImageIndex(0);
+          // Seleccionar primer modelo disponible
+          const firstModel = variant.models[0];
+          if (firstModel) {
+            setSelectedModelId(firstModel.id);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading brand variant:', error);
+      } finally {
+        setLoadingBrandVariant(false);
+      }
+    },
+    [accessory.id]
+  );
+
   const handleDecreaseQuantity = () => {
     setQuantity((prev) => Math.max(1, prev - 1));
   };
@@ -133,13 +183,9 @@ export function AccessoryDetailView({ accessory }: Props) {
     setSelectedColorId(colorId);
   };
 
-  const handleSelectBrand = (brandId: string) => {
+  const handleSelectBrand = async (brandId: string) => {
     setSelectedBrandId(brandId);
-    const brand = getBrandOptionById(brandOptions, brandId);
-    const firstModel = brand?.models[0];
-    if (firstModel) {
-      setSelectedModelId(firstModel.id);
-    }
+    await loadBrandVariant(brandId);
   };
 
   const handleSelectModel = (modelId: string) => {
@@ -147,11 +193,11 @@ export function AccessoryDetailView({ accessory }: Props) {
   };
 
   const createCartItem = useCallback((): Omit<CartItem, 'cantidad'> | null => {
-    if (!activeVariant || !selectedColor) {
+    if (!activeVariant || !selectedColor || !currentBrandVariant) {
       return null;
     }
 
-    const image = activeVariant.images[0] ?? accessory.heroImage;
+    const image = activeVariant.images[0] ?? currentBrandVariant.heroImage;
     const cartItemId = [
       'accessory',
       accessory.id,
@@ -164,8 +210,8 @@ export function AccessoryDetailView({ accessory }: Props) {
       id: cartItemId,
       type: 'producto',
       productId: accessory.id,
-      marca: selectedBrand?.name ?? accessory.brand.name,
-      modelo: selectedModel?.name ?? accessory.model.name,
+      marca: selectedBrand?.name ?? currentBrandVariant.brandName,
+      modelo: selectedModel?.name ?? modelOptions[0]?.name ?? 'Unknown',
       nombre: accessory.name,
       precio: activeVariant.price,
       imagen: image.url,
@@ -187,25 +233,56 @@ export function AccessoryDetailView({ accessory }: Props) {
         },
       },
     };
-  }, [accessory, activeVariant, selectedBrand, selectedModel, selectedColor]);
+  }, [
+    accessory,
+    activeVariant,
+    selectedBrand,
+    selectedModel,
+    selectedColor,
+    currentBrandVariant,
+    modelOptions,
+  ]);
 
-  const handleAddToCart = () => {
-    const item = createCartItem();
-    if (!item) {
+  const addAccessoryToCart = useCallback(
+    async (shouldRedirect: boolean) => {
+      const item = createCartItem();
+      if (!item) {
+        return;
+      }
+
+      for (let i = 0; i < quantity; i += 1) {
+        addItem(item);
+      }
+
+      if (shouldRedirect) {
+        router.push('/cart');
+      }
+    },
+    [addItem, createCartItem, quantity, router]
+  );
+
+  const handleAddToCart = async () => {
+    if (addingToCart) {
       return;
     }
-
-    for (let i = 0; i < quantity; i += 1) {
-      addItem(item);
+    setAddingToCart(true);
+    try {
+      await addAccessoryToCart(true);
+    } finally {
+      setAddingToCart(false);
     }
   };
 
-  const handleBuyNow = () => {
-    if (isOutOfStock) {
+  const handleBuyNow = async () => {
+    if (isOutOfStock || addingToCart) {
       return;
     }
-    handleAddToCart();
-    router.push('/cart');
+    setAddingToCart(true);
+    try {
+      await addAccessoryToCart(true);
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
   return (
@@ -227,6 +304,7 @@ export function AccessoryDetailView({ accessory }: Props) {
             images={galleryImages}
             activeIndex={activeImageIndex}
             onChange={setActiveImageIndex}
+            isLoading={loadingBrandVariant}
           />
         </Box>
 
@@ -248,7 +326,7 @@ export function AccessoryDetailView({ accessory }: Props) {
                 <Chip
                   color="default"
                   variant="outlined"
-                  label={selectedBrand?.name ?? accessory.brand.name}
+                  label={selectedBrand?.name ?? currentBrandVariant?.brandName ?? 'Samsung'}
                   icon={<Iconify icon="ri:samsung-fill" width={20} />}
                   sx={{
                     fontWeight: 500,
@@ -263,7 +341,7 @@ export function AccessoryDetailView({ accessory }: Props) {
               </Typography>
 
               <Typography variant="h5" sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {formatCurrency(activeVariant?.price ?? accessory.price, accessory.currency)}
+                {formatCurrency(currentPrice, accessory.currency)}
               </Typography>
 
               <Typography variant="body1" sx={{ color: 'text.secondary' }}>
@@ -274,47 +352,53 @@ export function AccessoryDetailView({ accessory }: Props) {
             <Divider />
 
             <Stack spacing={3}>
-              <Stack spacing={1}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  Color
-                </Typography>
+              {loadingBrandVariant ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <Stack spacing={1}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    Color
+                  </Typography>
 
-                <Stack direction="row" spacing={1.5} flexWrap="wrap" rowGap={2}>
-                  {colorOptions.map((color) => {
-                    const isSelected = color.id === selectedColorId;
-                    return (
-                      <ButtonBase
-                        key={color.id}
-                        onClick={() => handleSelectColor(color.id)}
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: '50%',
-                          border: '2px solid',
-                          borderColor: isSelected ? 'primary.main' : 'transparent',
-                          boxShadow: isSelected
-                            ? '0 12px 24px rgba(161, 137, 111, 0.25)'
-                            : '0 6px 12px rgba(161, 137, 111, 0.12)',
-                          transition: (theme) =>
-                            theme.transitions.create(['transform', 'box-shadow', 'border-color']),
-                          transform: isSelected ? 'scale(1.06)' : 'scale(1)',
-                        }}
-                      >
-                        <Box
+                  <Stack direction="row" spacing={1.5} flexWrap="wrap" rowGap={2}>
+                    {colorOptions.map((color) => {
+                      const isSelected = color.id === selectedColorId;
+                      return (
+                        <ButtonBase
+                          key={color.id}
+                          onClick={() => handleSelectColor(color.id)}
                           sx={{
-                            width: 36,
-                            height: 36,
+                            width: 44,
+                            height: 44,
                             borderRadius: '50%',
-                            bgcolor: color.hex ?? color.value,
-                            border: '1px solid',
-                            borderColor: '#ECECEC',
+                            border: '2px solid',
+                            borderColor: isSelected ? 'primary.main' : 'transparent',
+                            boxShadow: isSelected
+                              ? '0 12px 24px rgba(161, 137, 111, 0.25)'
+                              : '0 6px 12px rgba(161, 137, 111, 0.12)',
+                            transition: (theme) =>
+                              theme.transitions.create(['transform', 'box-shadow', 'border-color']),
+                            transform: isSelected ? 'scale(1.06)' : 'scale(1)',
                           }}
-                        />
-                      </ButtonBase>
-                    );
-                  })}
+                        >
+                          <Box
+                            sx={{
+                              width: 36,
+                              height: 36,
+                              borderRadius: '50%',
+                              bgcolor: color.hex ?? color.value,
+                              border: '1px solid',
+                              borderColor: '#ECECEC',
+                            }}
+                          />
+                        </ButtonBase>
+                      );
+                    })}
+                  </Stack>
                 </Stack>
-              </Stack>
+              )}
 
               <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
                 <TextField
@@ -400,7 +484,7 @@ export function AccessoryDetailView({ accessory }: Props) {
                 color="warning"
                 fullWidth
                 onClick={handleBuyNow}
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || addingToCart}
                 sx={{
                   borderRadius: 10,
                   py: 1.5,
@@ -408,7 +492,17 @@ export function AccessoryDetailView({ accessory }: Props) {
                   fontSize: '1rem',
                 }}
               >
-                Comprar ahora
+                {addingToCart ? (
+                  <Box
+                    component="span"
+                    sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}
+                  >
+                    <CircularProgress size={18} color="inherit" />
+                    Procesando...
+                  </Box>
+                ) : (
+                  'Comprar ahora'
+                )}
               </Button>
 
               <Button
@@ -416,7 +510,7 @@ export function AccessoryDetailView({ accessory }: Props) {
                 variant="outlined"
                 fullWidth
                 onClick={handleAddToCart}
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || addingToCart}
                 sx={{
                   borderRadius: 10,
                   py: 1.5,
@@ -424,7 +518,17 @@ export function AccessoryDetailView({ accessory }: Props) {
                   fontSize: '1rem',
                 }}
               >
-                Agregar al carrito
+                {addingToCart ? (
+                  <Box
+                    component="span"
+                    sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}
+                  >
+                    <CircularProgress size={18} color="inherit" />
+                    Agregando...
+                  </Box>
+                ) : (
+                  'Agregar al carrito'
+                )}
               </Button>
             </Stack>
 

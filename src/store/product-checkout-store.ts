@@ -341,14 +341,8 @@ export const useProductCheckoutStore = create<ProductCheckoutState>((set, get) =
         },
       }));
 
-      // Auto-seleccionar el almacenamiento con precio 0 (incluido) y cargar colores
-      const includedStorage = storage.find((s) => s.price === 0);
-      if (includedStorage) {
-        // Llamar a setStorage para seleccionar y cargar colores automáticamente
-        await get().setStorage(includedStorage.id);
-      } else {
-        get().calculateTotalPrice();
-      }
+      // NO auto-seleccionar almacenamiento - el usuario debe seleccionarlo manualmente
+      get().calculateTotalPrice();
     } catch {
       set((state) => ({
         loadingStates: {

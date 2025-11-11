@@ -1,3 +1,5 @@
+'use client';
+
 import type {
   Accessory,
   ColorOption,
@@ -5,10 +7,13 @@ import type {
   ProductCondition,
 } from 'src/store/product-checkout-store';
 
+import { useRouter } from 'next/navigation';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -32,10 +37,11 @@ type CheckoutSummaryProps = {
   formatPrice: (price: number) => string;
   onRemoveAccessory: (accessoryId: string) => void;
   onBuyNow: () => void;
-  onAddToCart: () => void;
+  onAddToCart: () => void | Promise<void>;
   isProcessingPayment?: boolean;
   paymentError?: string | null;
   isAddToCartDisabled?: boolean;
+  isAddingToCart?: boolean;
 };
 
 export function CheckoutSummary({
@@ -52,7 +58,24 @@ export function CheckoutSummary({
   isProcessingPayment = false,
   paymentError = null,
   isAddToCartDisabled = false,
+  isAddingToCart = false,
 }: CheckoutSummaryProps) {
+  const router = useRouter();
+
+  // Validación temprana: si no hay condition, no renderizamos nada
+  if (!condition) {
+    return null;
+  }
+
+  const handleAddToCartClick = async () => {
+    if (isAddToCartDisabled || isAddingToCart) {
+      return;
+    }
+
+    await onAddToCart();
+    router.push('/cart');
+  };
+
   // Determinar texto del total según cantidad de accesorios
   const getTotalText = () => {
     if (accessories.length === 0) return 'Total smartphone';
@@ -260,7 +283,7 @@ export function CheckoutSummary({
           variant="contained"
           fullWidth
           onClick={onBuyNow}
-          disabled={isProcessingPayment}
+          disabled={isProcessingPayment || isAddingToCart}
           sx={{
             height: 48,
             borderRadius: '27px',
@@ -279,8 +302,8 @@ export function CheckoutSummary({
         <Button
           variant="outlined"
           fullWidth
-          onClick={onAddToCart}
-          disabled={isAddToCartDisabled}
+          onClick={handleAddToCartClick}
+          disabled={isAddToCartDisabled || isAddingToCart}
           sx={{
             height: 48,
             borderRadius: '27px',
@@ -295,7 +318,14 @@ export function CheckoutSummary({
             },
           }}
         >
-          Agregar al carrito
+          {isAddingToCart ? (
+            <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+              <CircularProgress size={18} color="inherit" />
+              Agregando...
+            </Box>
+          ) : (
+            'Agregar al carrito'
+          )}
         </Button>
       </Box>
 

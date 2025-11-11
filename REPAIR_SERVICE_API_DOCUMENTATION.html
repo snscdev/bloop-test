@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>API Documentation - Sistema de Servicios de Reparaci&oacute;n</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+/* From extension bierner.markdown-preview-github-styles */
+body {
+    background: white;
+}
+
+.vscode-body {
+    box-sizing: border-box;
+    min-width: 200px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px;
+    border: 1px solid transparent;
+}
+
+.vscode-body blockquote {
+    background-color: initial;
+}
+
+.vscode-body pre {
+    color: initial;
+    background: #f7f7f7 !important;
+}
+
+.vscode-body code {
+    color: inherit;
+}
+
+.vscode-body pre code {
+    color: initial;
+}
+
+.vscode-body code > div {
+    background: none
+}
+
+.vscode-body table th,
+.vscode-body table td {
+    border: 1px solid #ddd !important;
+}
+
+.vscode-body.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-body.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-body.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-body p,
+.vscode-body blockquote,
+.vscode-body ul,
+.vscode-body ol,
+.vscode-body dl,
+.vscode-body table,
+.vscode-body pre {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+body.vscode-body::-webkit-scrollbar {
+    background-color: white;
+}
+body.vscode-body::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.4);
+}
+body.vscode-body::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(100, 100, 100, 0.7);
+}
+
+/* Generated from 'node_modules/github-markdown-css/github-markdown.css' */
+@font-face {
+  font-family: octicons-link;
+  src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');
+}
+
+.vscode-body {
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  line-height: 1.5;
+  color: #24292e;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.vscode-body .pl-c {
+  color: #6a737d;
+}
+
+.vscode-body .pl-c1,
+.vscode-body .pl-s .pl-v {
+  color: #005cc5;
+}
+
+.vscode-body .pl-e,
+.vscode-body .pl-en {
+  color: #6f42c1;
+}
+
+.vscode-body .pl-smi,
+.vscode-body .pl-s .pl-s1 {
+  color: #24292e;
+}
+
+.vscode-body .pl-ent {
+  color: #22863a;
+}
+
+.vscode-body .pl-k {
+  color: #d73a49;
+}
+
+.vscode-body .pl-s,
+.vscode-body .pl-pds,
+.vscode-body .pl-s .pl-pse .pl-s1,
+.vscode-body .pl-sr,
+.vscode-body .pl-sr .pl-cce,
+.vscode-body .pl-sr .pl-sre,
+.vscode-body .pl-sr .pl-sra {
+  color: #032f62;
+}
+
+.vscode-body .pl-v,
+.vscode-body .pl-smw {
+  color: #e36209;
+}
+
+.vscode-body .pl-bu {
+  color: #b31d28;
+}
+
+.vscode-body .pl-ii {
+  color: #fafbfc;
+  background-color: #b31d28;
+}
+
+.vscode-body .pl-c2 {
+  color: #fafbfc;
+  background-color: #d73a49;
+}
+
+.vscode-body .pl-c2::before {
+  content: "^M";
+}
+
+.vscode-body .pl-sr .pl-cce {
+  font-weight: bold;
+  color: #22863a;
+}
+
+.vscode-body .pl-ml {
+  color: #735c0f;
+}
+
+.vscode-body .pl-mh,
+.vscode-body .pl-mh .pl-en,
+.vscode-body .pl-ms {
+  font-weight: bold;
+  color: #005cc5;
+}
+
+.vscode-body .pl-mi {
+  font-style: italic;
+  color: #24292e;
+}
+
+.vscode-body .pl-mb {
+  font-weight: bold;
+  color: #24292e;
+}
+
+.vscode-body .pl-md {
+  color: #b31d28;
+  background-color: #ffeef0;
+}
+
+.vscode-body .pl-mi1 {
+  color: #22863a;
+  background-color: #f0fff4;
+}
+
+.vscode-body .pl-mc {
+  color: #e36209;
+  background-color: #ffebda;
+}
+
+.vscode-body .pl-mi2 {
+  color: #f6f8fa;
+  background-color: #005cc5;
+}
+
+.vscode-body .pl-mdr {
+  font-weight: bold;
+  color: #6f42c1;
+}
+
+.vscode-body .pl-ba {
+  color: #586069;
+}
+
+.vscode-body .pl-sg {
+  color: #959da5;
+}
+
+.vscode-body .pl-corl {
+  text-decoration: underline;
+  color: #032f62;
+}
+
+.vscode-body .octicon {
+  display: inline-block;
+  vertical-align: text-top;
+  fill: currentColor;
+}
+
+.vscode-body a {
+  background-color: transparent;
+}
+
+.vscode-body a:active,
+.vscode-body a:hover {
+  outline-width: 0;
+}
+
+.vscode-body strong {
+  font-weight: inherit;
+}
+
+.vscode-body strong {
+  font-weight: bolder;
+}
+
+.vscode-body h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+.vscode-body img {
+  border-style: none;
+}
+
+.vscode-body code,
+.vscode-body kbd,
+.vscode-body pre {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+.vscode-body hr {
+  box-sizing: content-box;
+  height: 0;
+  overflow: visible;
+}
+
+.vscode-body input {
+  font: inherit;
+  margin: 0;
+}
+
+.vscode-body input {
+  overflow: visible;
+}
+
+.vscode-body [type="checkbox"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.vscode-body * {
+  box-sizing: border-box;
+}
+
+.vscode-body input {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.vscode-body a {
+  color: #0366d6;
+  text-decoration: none;
+}
+
+.vscode-body a:hover {
+  text-decoration: underline;
+}
+
+.vscode-body strong {
+  font-weight: 600;
+}
+
+.vscode-body hr {
+  height: 0;
+  margin: 15px 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #dfe2e5;
+}
+
+.vscode-body hr::before {
+  display: table;
+  content: "";
+}
+
+.vscode-body hr::after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+.vscode-body table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.vscode-body td,
+.vscode-body th {
+  padding: 0;
+}
+
+.vscode-body h1,
+.vscode-body h2,
+.vscode-body h3,
+.vscode-body h4,
+.vscode-body h5,
+.vscode-body h6 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.vscode-body h1 {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.vscode-body h2 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.vscode-body h3 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.vscode-body h4 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.vscode-body h5 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vscode-body h6 {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.vscode-body p {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.vscode-body blockquote {
+  margin: 0;
+}
+
+.vscode-body ul,
+.vscode-body ol {
+  padding-left: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.vscode-body ol ol,
+.vscode-body ul ol {
+  list-style-type: lower-roman;
+}
+
+.vscode-body ul ul ol,
+.vscode-body ul ol ol,
+.vscode-body ol ul ol,
+.vscode-body ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+.vscode-body dd {
+  margin-left: 0;
+}
+
+.vscode-body code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 12px;
+}
+
+.vscode-body pre {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 12px;
+}
+
+.vscode-body .octicon {
+  vertical-align: text-bottom;
+}
+
+.vscode-body .pl-0 {
+  padding-left: 0 !important;
+}
+
+.vscode-body .pl-1 {
+  padding-left: 4px !important;
+}
+
+.vscode-body .pl-2 {
+  padding-left: 8px !important;
+}
+
+.vscode-body .pl-3 {
+  padding-left: 16px !important;
+}
+
+.vscode-body .pl-4 {
+  padding-left: 24px !important;
+}
+
+.vscode-body .pl-5 {
+  padding-left: 32px !important;
+}
+
+.vscode-body .pl-6 {
+  padding-left: 40px !important;
+}
+
+.vscode-body::before {
+  display: table;
+  content: "";
+}
+
+.vscode-body::after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+.vscode-body>*:first-child {
+  margin-top: 0 !important;
+}
+
+.vscode-body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+.vscode-body a:not([href]) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.vscode-body .anchor {
+  float: left;
+  padding-right: 4px;
+  margin-left: -20px;
+  line-height: 1;
+}
+
+.vscode-body .anchor:focus {
+  outline: none;
+}
+
+.vscode-body p,
+.vscode-body blockquote,
+.vscode-body ul,
+.vscode-body ol,
+.vscode-body dl,
+.vscode-body table,
+.vscode-body pre {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.vscode-body hr {
+  height: 0.25em;
+  padding: 0;
+  margin: 24px 0;
+  background-color: #e1e4e8;
+  border: 0;
+}
+
+.vscode-body blockquote {
+  padding: 0 1em;
+  color: #6a737d;
+  border-left: 0.25em solid #dfe2e5;
+}
+
+.vscode-body blockquote>:first-child {
+  margin-top: 0;
+}
+
+.vscode-body blockquote>:last-child {
+  margin-bottom: 0;
+}
+
+.vscode-body kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #444d56;
+  vertical-align: middle;
+  background-color: #fafbfc;
+  border: solid 1px #c6cbd1;
+  border-bottom-color: #959da5;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #959da5;
+}
+
+.vscode-body h1,
+.vscode-body h2,
+.vscode-body h3,
+.vscode-body h4,
+.vscode-body h5,
+.vscode-body h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.vscode-body h1 .octicon-link,
+.vscode-body h2 .octicon-link,
+.vscode-body h3 .octicon-link,
+.vscode-body h4 .octicon-link,
+.vscode-body h5 .octicon-link,
+.vscode-body h6 .octicon-link {
+  color: #1b1f23;
+  vertical-align: middle;
+  visibility: hidden;
+}
+
+.vscode-body h1:hover .anchor,
+.vscode-body h2:hover .anchor,
+.vscode-body h3:hover .anchor,
+.vscode-body h4:hover .anchor,
+.vscode-body h5:hover .anchor,
+.vscode-body h6:hover .anchor {
+  text-decoration: none;
+}
+
+.vscode-body h1:hover .anchor .octicon-link,
+.vscode-body h2:hover .anchor .octicon-link,
+.vscode-body h3:hover .anchor .octicon-link,
+.vscode-body h4:hover .anchor .octicon-link,
+.vscode-body h5:hover .anchor .octicon-link,
+.vscode-body h6:hover .anchor .octicon-link {
+  visibility: visible;
+}
+
+.vscode-body h1 {
+  padding-bottom: 0.3em;
+  font-size: 2em;
+  border-bottom: 1px solid #eaecef;
+}
+
+.vscode-body h2 {
+  padding-bottom: 0.3em;
+  font-size: 1.5em;
+  border-bottom: 1px solid #eaecef;
+}
+
+.vscode-body h3 {
+  font-size: 1.25em;
+}
+
+.vscode-body h4 {
+  font-size: 1em;
+}
+
+.vscode-body h5 {
+  font-size: 0.875em;
+}
+
+.vscode-body h6 {
+  font-size: 0.85em;
+  color: #6a737d;
+}
+
+.vscode-body ul,
+.vscode-body ol {
+  padding-left: 2em;
+}
+
+.vscode-body ul ul,
+.vscode-body ul ol,
+.vscode-body ol ol,
+.vscode-body ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.vscode-body li {
+  word-wrap: break-all;
+}
+
+.vscode-body li>p {
+  margin-top: 16px;
+}
+
+.vscode-body li+li {
+  margin-top: 0.25em;
+}
+
+.vscode-body dl {
+  padding: 0;
+}
+
+.vscode-body dl dt {
+  padding: 0;
+  margin-top: 16px;
+  font-size: 1em;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.vscode-body dl dd {
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.vscode-body table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+}
+
+.vscode-body table th {
+  font-weight: 600;
+}
+
+.vscode-body table th,
+.vscode-body table td {
+  padding: 6px 13px;
+  border: 1px solid #dfe2e5;
+}
+
+.vscode-body table tr {
+  background-color: #fff;
+  border-top: 1px solid #c6cbd1;
+}
+
+.vscode-body table tr:nth-child(2n) {
+  background-color: #f6f8fa;
+}
+
+.vscode-body img {
+  max-width: 100%;
+  box-sizing: content-box;
+  background-color: #fff;
+}
+
+.vscode-body img[align=right] {
+  padding-left: 20px;
+}
+
+.vscode-body img[align=left] {
+  padding-right: 20px;
+}
+
+.vscode-body code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(27,31,35,0.05);
+  border-radius: 3px;
+}
+
+.vscode-body pre {
+  word-wrap: normal;
+}
+
+.vscode-body pre>code {
+  padding: 0;
+  margin: 0;
+  font-size: 100%;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
+  border: 0;
+}
+
+.vscode-body .highlight {
+  margin-bottom: 16px;
+}
+
+.vscode-body .highlight pre {
+  margin-bottom: 0;
+  word-break: normal;
+}
+
+.vscode-body .highlight pre,
+.vscode-body pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
+  border-radius: 3px;
+}
+
+.vscode-body pre code {
+  display: inline;
+  max-width: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.vscode-body .full-commit .btn-outline:not(:disabled):hover {
+  color: #005cc5;
+  border-color: #005cc5;
+}
+
+.vscode-body kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font: 11px "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  line-height: 10px;
+  color: #444d56;
+  vertical-align: middle;
+  background-color: #fafbfc;
+  border: solid 1px #d1d5da;
+  border-bottom-color: #c6cbd1;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #c6cbd1;
+}
+
+.vscode-body :checked+.radio-label {
+  position: relative;
+  z-index: 1;
+  border-color: #0366d6;
+}
+
+.vscode-body .task-list-item {
+  list-style-type: none;
+}
+
+.vscode-body .task-list-item+.task-list-item {
+  margin-top: 3px;
+}
+
+.vscode-body .task-list-item input {
+  margin: 0 0.2em 0.25em -1.6em;
+  vertical-align: middle;
+}
+
+.vscode-body hr {
+  border-bottom-color: #eee;
+}
+
+/*
+
+github.com style (c) Vasily Polovnyov <vast@whiteants.net>
+
+*/
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  color: #333;
+  background: #f8f8f8;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #998;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: #333;
+  font-weight: bold;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+  color: #008080;
+}
+
+.hljs-string,
+.hljs-doctag {
+  color: #d14;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #900;
+  font-weight: bold;
+}
+
+.hljs-subst {
+  font-weight: normal;
+}
+
+.hljs-type,
+.hljs-class .hljs-title {
+  color: #458;
+  font-weight: bold;
+}
+
+.hljs-tag,
+.hljs-name,
+.hljs-attribute {
+  color: #000080;
+  font-weight: normal;
+}
+
+.hljs-regexp,
+.hljs-link {
+  color: #009926;
+}
+
+.hljs-symbol,
+.hljs-bullet {
+  color: #990073;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #0086b3;
+}
+
+.hljs-meta {
+  color: #999;
+  font-weight: bold;
+}
+
+.hljs-deletion {
+  background: #fdd;
+}
+
+.hljs-addition {
+  background: #dfd;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="api-documentation---sistema-de-servicios-de-reparación">API Documentation - Sistema de Servicios de Reparación</h1>
+<h2 id="contexto">Contexto</h2>
+<p>El sistema de servicios técnicos permite a los usuarios:</p>
+<ol>
+<li><strong>Seleccionar su dispositivo</strong>: Marca y modelo específico</li>
+<li><strong>Elegir calidad del repuesto</strong>: Original, Premium o Económica (según disponibilidad para su dispositivo)</li>
+<li><strong>Ver precio total</strong>: Servicio base + costo del repuesto</li>
+<li><strong>Agendar reparación</strong>: Agregar al carrito y completar el proceso</li>
+</ol>
+<h3 id="características-clave">Características Clave:</h3>
+<ul>
+<li><strong>Disponibilidad dinámica</strong>: Los repuestos varían según marca y modelo del dispositivo</li>
+<li><strong>Precio base fijo</strong>: Cada servicio tiene un precio base (ej: $79.99 MXN)</li>
+<li><strong>Precio del repuesto</strong>: Se suma al precio base según la calidad elegida</li>
+<li><strong>Garantías variables</strong>: Cada calidad de repuesto tiene diferente garantía (30, 60 o 90 días)</li>
+</ul>
+<hr>
+<h2 id="endpoints-requeridos">Endpoints Requeridos</h2>
+<h3 id="1-obtener-servicio-de-reparación-por-id">1. Obtener Servicio de Reparación por ID</h3>
+<p>Obtiene la información completa de un servicio de reparación con todas las opciones disponibles.</p>
+<p><strong>Endpoint:</strong></p>
+<pre><code>GET /api/repair-services/{serviceId}
+</code></pre>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>serviceId</code> (string, path): ID único del servicio (ej: &quot;screen-replacement&quot;, &quot;battery-replacement&quot;)</li>
+</ul>
+<p><strong>Query Parameters (opcional):</strong></p>
+<ul>
+<li><code>serviceSlug</code> (string): Slug del servicio para contexto adicional</li>
+</ul>
+<p><strong>Respuesta exitosa (200):</strong></p>
+<pre><code class="language-typescript">{
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;                          <span class="hljs-comment">// ID único del servicio</span>
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;                        <span class="hljs-comment">// Nombre del servicio (ej: &quot;Cambio de pantalla&quot;)</span>
+  <span class="hljs-attr">slug</span>: <span class="hljs-built_in">string</span>;                        <span class="hljs-comment">// Slug para URL (ej: &quot;screen-replacement&quot;)</span>
+  <span class="hljs-attr">description</span>: <span class="hljs-built_in">string</span>;                 <span class="hljs-comment">// Descripción del servicio</span>
+  <span class="hljs-attr">basePrice</span>: <span class="hljs-built_in">number</span>;                   <span class="hljs-comment">// Precio base del servicio en centavos (ej: 7999 = $79.99)</span>
+  <span class="hljs-attr">currency</span>: <span class="hljs-built_in">string</span>;                    <span class="hljs-comment">// Moneda (ej: &quot;MXN&quot;)</span>
+  <span class="hljs-attr">category</span>: <span class="hljs-built_in">string</span>;                    <span class="hljs-comment">// Categoría (ej: &quot;screen&quot;, &quot;battery&quot;, &quot;camera&quot;)</span>
+  <span class="hljs-attr">estimatedTime</span>: <span class="hljs-built_in">string</span>;               <span class="hljs-comment">// Tiempo estimado (ej: &quot;2-3 horas&quot;, &quot;24 horas&quot;)</span>
+  <span class="hljs-attr">warrantyDays</span>: <span class="hljs-built_in">number</span>;                <span class="hljs-comment">// Días de garantía del servicio base</span>
+
+  <span class="hljs-attr">supportedBrands</span>: <span class="hljs-title class_">DeviceBrand</span>[];      <span class="hljs-comment">// Marcas de dispositivos compatibles con sus modelos</span>
+
+  <span class="hljs-attr">gallery</span>: <span class="hljs-built_in">string</span>[];                   <span class="hljs-comment">// Imágenes del servicio</span>
+  <span class="hljs-attr">highlights</span>: <span class="hljs-built_in">string</span>[];                <span class="hljs-comment">// Puntos destacados</span>
+  <span class="hljs-attr">termsAndConditions</span>: <span class="hljs-built_in">string</span>;          <span class="hljs-comment">// Términos y condiciones del servicio</span>
+}
+</code></pre>
+<p><strong>Ejemplo de respuesta:</strong></p>
+<pre><code class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;screen-replacement&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Cambio de pantalla&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;cambio-de-pantalla&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Reemplazo completo de la pantalla de tu dispositivo con repuestos de alta calidad. Incluye limpieza interna y pruebas de funcionamiento.&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;basePrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7999</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;currency&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;MXN&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;category&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;screen&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;estimatedTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2-3 horas&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;warrantyDays&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">90</span><span class="hljs-punctuation">,</span>
+
+  <span class="hljs-attr">&quot;supportedBrands&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;apple&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Apple&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;apple&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;iconUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/brands/apple.svg&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;models&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iphone-15-pro-max&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iPhone 15 Pro Max&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iphone-15-pro-max&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;releaseYear&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2023</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;imageUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/devices/iphone-15-pro-max.png&quot;</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iphone-15-plus&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iPhone 15 Plus&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iphone-15-plus&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;releaseYear&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2023</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;imageUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/devices/iphone-15-plus.png&quot;</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iphone-14&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iPhone 14&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iphone-14&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;releaseYear&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2022</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;imageUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/devices/iphone-14.png&quot;</span>
+        <span class="hljs-punctuation">}</span>
+      <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;samsung&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Samsung&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;samsung&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;iconUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/brands/samsung.svg&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;models&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;galaxy-s24-plus&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Galaxy S24 Plus&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;galaxy-s24-plus&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;releaseYear&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2024</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;imageUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/devices/galaxy-s24-plus.png&quot;</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;galaxy-s24-ultra&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Galaxy S24 Ultra&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;galaxy-s24-ultra&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;releaseYear&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2024</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;imageUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/devices/galaxy-s24-ultra.png&quot;</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;galaxy-z-flip-5&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Galaxy Z Flip 5&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;galaxy-z-flip-5&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;releaseYear&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2023</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;imageUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/devices/galaxy-z-flip-5.png&quot;</span>
+        <span class="hljs-punctuation">}</span>
+      <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;google&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Google&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;google&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;iconUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/brands/google.svg&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;models&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;pixel-8-pro&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Pixel 8 Pro&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;pixel-8-pro&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;releaseYear&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2023</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;imageUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/devices/pixel-8-pro.png&quot;</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;pixel-7a&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Pixel 7a&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;pixel-7a&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;releaseYear&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2023</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;imageUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/devices/pixel-7a.png&quot;</span>
+        <span class="hljs-punctuation">}</span>
+      <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+
+  <span class="hljs-attr">&quot;gallery&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-string">&quot;https://cdn.bloop.com/services/screen-replacement-1.jpg&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-string">&quot;https://cdn.bloop.com/services/screen-replacement-2.jpg&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-string">&quot;https://cdn.bloop.com/services/screen-replacement-3.jpg&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-string">&quot;https://cdn.bloop.com/services/screen-replacement-4.jpg&quot;</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+
+  <span class="hljs-attr">&quot;highlights&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-string">&quot;Técnicos certificados con más de 5 años de experiencia&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-string">&quot;Proceso de reparación en ambiente controlado&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-string">&quot;Pruebas exhaustivas antes de entrega&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-string">&quot;Garantía extendida disponible&quot;</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+
+  <span class="hljs-attr">&quot;termsAndConditions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;El servicio incluye mano de obra y limpieza interna. La garantía cubre defectos de fabricación del repuesto instalado. No cubre daños causados por mal uso o golpes posteriores...&quot;</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p><strong>Errores:</strong></p>
+<ul>
+<li><code>404 Not Found</code>: Servicio no encontrado</li>
+<li><code>500 Internal Server Error</code>: Error del servidor</li>
+</ul>
+<hr>
+<h3 id="2-obtener-repuestos-disponibles-para-dispositivo">2. Obtener Repuestos Disponibles para Dispositivo</h3>
+<p>Obtiene solo los repuestos compatibles con un dispositivo específico. Este endpoint se llama cuando el usuario selecciona marca y modelo.</p>
+<p><strong>Endpoint:</strong></p>
+<pre><code>GET /api/repair-services/{serviceId}/replacements
+</code></pre>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>serviceId</code> (string, path): ID del servicio</li>
+</ul>
+<p><strong>Query Parameters:</strong></p>
+<ul>
+<li><code>brandId</code> (string, required): ID de la marca del dispositivo</li>
+<li><code>modelId</code> (string, required): ID del modelo del dispositivo</li>
+</ul>
+<p><strong>Respuesta exitosa (200):</strong></p>
+<pre><code class="language-typescript">{
+  <span class="hljs-attr">availableReplacements</span>: <span class="hljs-title class_">ReplacementOption</span>[];
+  <span class="hljs-attr">recommendedReplacementId</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>;
+}
+</code></pre>
+<p><strong>Ejemplo de request:</strong></p>
+<pre><code>GET /api/repair-services/screen-replacement/replacements?brandId=apple&amp;modelId=iphone-15-pro-max
+</code></pre>
+<p><strong>Ejemplo de respuesta:</strong></p>
+<pre><code class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;availableReplacements&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;original&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Pantalla original&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;qualityLevel&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;original&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;price&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">14999</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Repuesto certificado por el fabricante con calibración original.&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;imageUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/replacements/original-screen.jpg&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;benefits&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;100% original&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;True Tone compatible&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;Garantía 90 días&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;warrantyDays&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">90</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;isRecommended&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;recommendedReplacementId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;original&quot;</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p><strong>Errores:</strong></p>
+<ul>
+<li><code>404 Not Found</code>: Servicio no encontrado</li>
+<li><code>400 Bad Request</code>: Parámetros inválidos o faltantes</li>
+<li><code>200 OK + Empty Array</code>: No hay repuestos disponibles para ese dispositivo</li>
+<li><code>500 Internal Server Error</code>: Error del servidor</li>
+</ul>
+<hr>
+<h3 id="3-listar-servicios-de-reparación">3. Listar Servicios de Reparación</h3>
+<p>Obtiene una lista de todos los servicios de reparación disponibles.</p>
+<p><strong>Endpoint:</strong></p>
+<pre><code>GET /api/repair-services
+</code></pre>
+<p><strong>Query Parameters (opcional):</strong></p>
+<ul>
+<li><code>category</code> (string): Filtrar por categoría (ej: &quot;screen&quot;, &quot;battery&quot;, &quot;camera&quot;)</li>
+<li><code>brandId</code> (string): Filtrar por marca compatible</li>
+<li><code>modelId</code> (string): Filtrar por modelo compatible</li>
+<li><code>page</code> (number): Número de página (default: 1)</li>
+<li><code>limit</code> (number): Items por página (default: 20)</li>
+</ul>
+<p><strong>Respuesta exitosa (200):</strong></p>
+<pre><code class="language-typescript">{
+  <span class="hljs-attr">services</span>: <span class="hljs-title class_">RepairServiceSummary</span>[];
+  <span class="hljs-attr">total</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">page</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">limit</span>: <span class="hljs-built_in">number</span>;
+}
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">RepairServiceSummary</span> = {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">slug</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">description</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">basePrice</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">currency</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">category</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">estimatedTime</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">iconUrl</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">thumbnailUrl</span>: <span class="hljs-built_in">string</span>;
+}
+</code></pre>
+<p><strong>Ejemplo de respuesta:</strong></p>
+<pre><code class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;services&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;screen-replacement&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Cambio de pantalla&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;cambio-de-pantalla&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Reemplazo completo de la pantalla de tu dispositivo&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;basePrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7999</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;currency&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;MXN&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;category&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;screen&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;estimatedTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2-3 horas&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;iconUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/icons/screen.svg&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;thumbnailUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/services/screen-thumb.jpg&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;battery-replacement&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Cambio de batería&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;slug&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;cambio-de-bateria&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Reemplazo de batería con repuesto de alta capacidad&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;basePrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5999</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;currency&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;MXN&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;category&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;battery&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;estimatedTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1-2 horas&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;iconUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/icons/battery.svg&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;thumbnailUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/services/battery-thumb.jpg&quot;</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;total&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;page&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;limit&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">20</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<hr>
+<h3 id="4-validar-disponibilidad-de-servicio">4. Validar Disponibilidad de Servicio</h3>
+<p>Valida si un servicio específico está disponible para un dispositivo antes de agregar al carrito.</p>
+<p><strong>Endpoint:</strong></p>
+<pre><code>POST /api/repair-services/{serviceId}/validate
+</code></pre>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>serviceId</code> (string, path): ID del servicio</li>
+</ul>
+<p><strong>Body:</strong></p>
+<pre><code class="language-typescript">{
+  <span class="hljs-attr">brandId</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">modelId</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">replacementId</span>: <span class="hljs-built_in">string</span>;
+}
+</code></pre>
+<p><strong>Ejemplo de request:</strong></p>
+<pre><code class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;brandId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;apple&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;modelId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iphone-15-pro-max&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;replacementId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;original&quot;</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p><strong>Respuesta exitosa (200):</strong></p>
+<pre><code class="language-typescript">{
+  <span class="hljs-attr">available</span>: <span class="hljs-built_in">boolean</span>;
+  <span class="hljs-attr">servicePrice</span>: <span class="hljs-built_in">number</span>;               <span class="hljs-comment">// Precio base del servicio</span>
+  <span class="hljs-attr">replacementPrice</span>: <span class="hljs-built_in">number</span>;           <span class="hljs-comment">// Precio del repuesto</span>
+  <span class="hljs-attr">totalPrice</span>: <span class="hljs-built_in">number</span>;                 <span class="hljs-comment">// Suma total</span>
+  <span class="hljs-attr">currency</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">estimatedTime</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">warrantyDays</span>: <span class="hljs-built_in">number</span>;               <span class="hljs-comment">// Días de garantía del repuesto</span>
+  message?: <span class="hljs-built_in">string</span>;                   <span class="hljs-comment">// Mensaje si no está disponible</span>
+}
+</code></pre>
+<p><strong>Ejemplo de respuesta (disponible):</strong></p>
+<pre><code class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;available&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;servicePrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7999</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;replacementPrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">14999</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;totalPrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">22998</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;currency&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;MXN&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;estimatedTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2-3 horas&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;warrantyDays&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">90</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p><strong>Ejemplo de respuesta (no disponible):</strong></p>
+<pre><code class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;available&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;servicePrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7999</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;replacementPrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;totalPrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;currency&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;MXN&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;estimatedTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2-3 horas&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;warrantyDays&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;El repuesto seleccionado no está disponible para este modelo&quot;</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p><strong>Errores:</strong></p>
+<ul>
+<li><code>404 Not Found</code>: Servicio, marca, modelo o repuesto no encontrado</li>
+<li><code>400 Bad Request</code>: Datos inválidos</li>
+<li><code>500 Internal Server Error</code>: Error del servidor</li>
+</ul>
+<hr>
+<h2 id="tipos-de-datos-typescript">Tipos de Datos (TypeScript)</h2>
+<pre><code class="language-typescript"><span class="hljs-comment">// Modelo de dispositivo</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">DeviceModel</span> = {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">slug</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">releaseYear</span>: <span class="hljs-built_in">number</span>;
+  imageUrl?: <span class="hljs-built_in">string</span>;
+};
+
+<span class="hljs-comment">// Marca de dispositivo con sus modelos</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">DeviceBrand</span> = {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">slug</span>: <span class="hljs-built_in">string</span>;
+  iconUrl?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">models</span>: <span class="hljs-title class_">DeviceModel</span>[];
+};
+
+<span class="hljs-comment">// Disponibilidad del repuesto</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">ReplacementAvailability</span> = {
+  <span class="hljs-attr">brands</span>: <span class="hljs-built_in">string</span>[]; <span class="hljs-comment">// IDs de marcas compatibles</span>
+  <span class="hljs-attr">models</span>: <span class="hljs-built_in">string</span>[]; <span class="hljs-comment">// IDs de modelos compatibles</span>
+};
+
+<span class="hljs-comment">// Opción de repuesto</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">ReplacementOption</span> = {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">qualityLevel</span>: <span class="hljs-string">&#x27;original&#x27;</span> | <span class="hljs-string">&#x27;premium&#x27;</span> | <span class="hljs-string">&#x27;economy&#x27;</span>;
+  <span class="hljs-attr">price</span>: <span class="hljs-built_in">number</span>; <span class="hljs-comment">// Precio en centavos</span>
+  <span class="hljs-attr">description</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">imageUrl</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">benefits</span>: <span class="hljs-built_in">string</span>[]; <span class="hljs-comment">// Lista de beneficios</span>
+  <span class="hljs-attr">warrantyDays</span>: <span class="hljs-built_in">number</span>; <span class="hljs-comment">// Días de garantía del repuesto</span>
+  <span class="hljs-attr">isRecommended</span>: <span class="hljs-built_in">boolean</span>;
+  <span class="hljs-attr">availability</span>: <span class="hljs-title class_">ReplacementAvailability</span>;
+};
+
+<span class="hljs-comment">// Servicio de reparación completo (usado por endpoint GET /api/repair-services/{id})</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">RepairService</span> = {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">slug</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">description</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">basePrice</span>: <span class="hljs-built_in">number</span>; <span class="hljs-comment">// Precio base en centavos</span>
+  <span class="hljs-attr">currency</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">category</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">estimatedTime</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">warrantyDays</span>: <span class="hljs-built_in">number</span>; <span class="hljs-comment">// Garantía del servicio base</span>
+
+  <span class="hljs-attr">supportedBrands</span>: <span class="hljs-title class_">DeviceBrand</span>[]; <span class="hljs-comment">// Marcas y modelos compatibles</span>
+
+  <span class="hljs-attr">gallery</span>: <span class="hljs-built_in">string</span>[];
+  <span class="hljs-attr">highlights</span>: <span class="hljs-built_in">string</span>[];
+  <span class="hljs-attr">termsAndConditions</span>: <span class="hljs-built_in">string</span>;
+};
+
+<span class="hljs-comment">// Resumen de servicio para listados</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">RepairServiceSummary</span> = {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">slug</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">description</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">basePrice</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">currency</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">category</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">estimatedTime</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">iconUrl</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">thumbnailUrl</span>: <span class="hljs-built_in">string</span>;
+};
+</code></pre>
+<hr>
+<h2 id="flujo-de-usuario">Flujo de Usuario</h2>
+<h3 id="1-carga-inicial-de-servicio">1. Carga Inicial de Servicio</h3>
+<ol>
+<li>Usuario visita <code>/reparar/cambio-de-pantalla/screen-replacement</code></li>
+<li>Frontend llama <code>GET /api/repair-services/screen-replacement</code></li>
+<li>Backend retorna:
+<ul>
+<li>Información básica del servicio (nombre, descripción, precio base)</li>
+<li>Marcas compatibles con sus modelos</li>
+<li>Galería de imágenes</li>
+</ul>
+</li>
+<li>Frontend muestra:
+<ul>
+<li>Banner del servicio</li>
+<li>Sección de selección de dispositivo (marca y modelo vacíos)</li>
+<li>Steps del proceso (definidos en frontend, siempre fijos)</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-selección-de-dispositivo">2. Selección de Dispositivo</h3>
+<ol>
+<li>Usuario selecciona marca (ej: &quot;Apple&quot;)</li>
+<li>Frontend actualiza dropdown de modelos con los de esa marca</li>
+<li>Usuario selecciona modelo (ej: &quot;iPhone 15 Pro Max&quot;)</li>
+<li>Frontend llama:<pre><code>GET /api/repair-services/screen-replacement/replacements?brandId=apple&amp;modelId=iphone-15-pro-max
+</code></pre>
+</li>
+<li>Backend retorna solo repuestos compatibles con ese dispositivo</li>
+<li>Frontend muestra sección de calidad de repuesto con opciones filtradas</li>
+<li>Frontend hace scroll automático a la sección de calidad</li>
+</ol>
+<h3 id="3-selección-de-calidad-de-repuesto">3. Selección de Calidad de Repuesto</h3>
+<ol>
+<li>Usuario selecciona calidad (ej: &quot;Pantalla original&quot;)</li>
+<li>Frontend actualiza precio total: <code>BASE_SERVICE_PRICE + replacementOption.price</code></li>
+<li>Frontend muestra sección de checkout con:
+<ul>
+<li>Carrusel de imágenes del servicio</li>
+<li>Resumen del servicio con precio total</li>
+<li>Botones &quot;Comprar ahora&quot; y &quot;Agregar al carrito&quot;</li>
+</ul>
+</li>
+<li>Frontend hace scroll automático a la sección de checkout</li>
+</ol>
+<h3 id="4-agregar-al-carrito">4. Agregar al Carrito</h3>
+<ol>
+<li>Usuario hace clic en &quot;Agregar al carrito&quot;</li>
+<li>Frontend llama (opcional pero recomendado):<pre><code>POST /api/repair-services/screen-replacement/validate
+</code></pre>
+Body:<pre><code class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;brandId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;apple&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;modelId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iphone-15-pro-max&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;replacementId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;original&quot;</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+</li>
+<li>Backend valida disponibilidad y retorna precio actualizado</li>
+<li>Si disponible, frontend agrega al carrito local:<pre><code class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;service|screen-replacement|apple|iphone-15-pro-max|original&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;servicio&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;servicio&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;cambio-de-pantalla&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;nombre&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Cambio de pantalla - iPhone 15 Pro Max - Pantalla original&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;precio&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">22998</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;imagen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://cdn.bloop.com/replacements/original-screen.jpg&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;options&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;service&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;screen-replacement&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Cambio de pantalla&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;basePrice&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7999</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;device&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;brandId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;apple&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;brandName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Apple&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;modelId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iphone-15-pro-max&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;modelName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iPhone 15 Pro Max&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;replacement&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;original&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Pantalla original&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;qualityLevel&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;original&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;price&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">14999</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;warrantyDays&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">90</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+</li>
+<li>Frontend redirige a <code>/cart</code></li>
+</ol>
+<h3 id="5-comprar-ahora">5. Comprar Ahora</h3>
+<p>Similar a &quot;Agregar al carrito&quot;, pero:</p>
+<ol>
+<li>Valida disponibilidad</li>
+<li>Agrega al carrito</li>
+<li>Redirige directamente al checkout/pago</li>
+</ol>
+<hr>
+<h2 id="validaciones-requeridas">Validaciones Requeridas</h2>
+<h3 id="backend-debe-validar">Backend debe validar:</h3>
+<ol>
+<li>
+<p><strong>Compatibilidad del dispositivo</strong>:</p>
+<ul>
+<li>Verificar que la marca existe en <code>supportedBrands</code></li>
+<li>Verificar que el modelo existe en <code>brand.models</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Disponibilidad del repuesto</strong>:</p>
+<ul>
+<li>Verificar que <code>brandId</code> está en <code>availability.brands</code></li>
+<li>Verificar que <code>modelId</code> está en <code>availability.models</code></li>
+<li>Verificar que hay stock disponible del repuesto</li>
+</ul>
+</li>
+<li>
+<p><strong>Precio actualizado</strong>:</p>
+<ul>
+<li>Retornar precio actual del servicio</li>
+<li>Retornar precio actual del repuesto</li>
+<li>Calcular total correctamente</li>
+</ul>
+</li>
+<li>
+<p><strong>Servicio activo</strong>:</p>
+<ul>
+<li>Verificar que el servicio está activo y publicado</li>
+<li>Verificar que acepta nuevas solicitudes</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="consideraciones-de-performance">Consideraciones de Performance</h2>
+<ol>
+<li>
+<p><strong>Caché</strong>:</p>
+<ul>
+<li>Cachear respuesta de <code>GET /api/repair-services/{id}</code> por 10 minutos</li>
+<li>Cachear listado de servicios por 15 minutos</li>
+<li>Invalidar caché al actualizar precios o disponibilidades</li>
+</ul>
+</li>
+<li>
+<p><strong>Optimización de Queries</strong>:</p>
+<ul>
+<li>Usar índices en <code>brandId</code> y <code>modelId</code></li>
+<li>Pre-cargar relaciones (brands → models, service → replacements)</li>
+</ul>
+</li>
+<li>
+<p><strong>CDN para imágenes</strong>:</p>
+<ul>
+<li>Todas las imágenes en CDN</li>
+<li>Usar WebP con fallback a JPEG</li>
+<li>Imágenes optimizadas por tamaño de pantalla</li>
+</ul>
+</li>
+<li>
+<p><strong>Validación en Frontend</strong>:</p>
+<ul>
+<li>Filtrar opciones localmente cuando sea posible</li>
+<li>Reducir llamadas al servidor</li>
+<li>Validar en servidor solo antes de agregar al carrito</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="notas-importantes">Notas Importantes</h2>
+<ol>
+<li>
+<p><strong>Precios en centavos</strong>: Todos los precios en centavos (ej: 7999 = $79.99 MXN)</p>
+</li>
+<li>
+<p><strong>Precio total</strong>: Siempre es <code>basePrice + replacementPrice</code></p>
+</li>
+<li>
+<p><strong>Disponibilidad dinámica</strong>: Los repuestos disponibles cambian según el dispositivo</p>
+</li>
+<li>
+<p><strong>Garantías separadas</strong>:</p>
+<ul>
+<li>Servicio base tiene su propia garantía (ej: 90 días)</li>
+<li>Cada repuesto puede tener garantía diferente (30, 60 o 90 días)</li>
+<li>La garantía final es la menor de las dos</li>
+</ul>
+</li>
+<li>
+<p><strong>Servicios sin cantidad</strong>: En el carrito, los servicios NO tienen contador de cantidad (siempre 1)</p>
+</li>
+<li>
+<p><strong>Imágenes del repuesto</strong>: Se muestran en el checkout, no del servicio genérico</p>
+</li>
+<li>
+<p><strong>Stock</strong>: Aunque el servicio esté disponible, validar stock del repuesto específico</p>
+</li>
+<li>
+<p><strong>Steps fijos</strong>: Los pasos del proceso (Elige modelo, Confirma solicitud, Entrega dispositivo, Recibe dispositivo) están hardcodeados en el frontend y son iguales para todos los servicios. No necesitan venir del backend.</p>
+</li>
+<li>
+<p><strong>Carga de repuestos bajo demanda</strong>: Los repuestos no se cargan en el primer request. Se obtienen solo después de seleccionar marca y modelo para reducir payload y asegurar datos actualizados.</p>
+</li>
+</ol>
+<hr>
+<h2 id="ejemplo-de-implementación-mínima">Ejemplo de Implementación Mínima</h2>
+<p>Si necesitas implementar solo lo básico:</p>
+<ol>
+<li>
+<p><strong>Prioritario</strong>:</p>
+<ul>
+<li><code>GET /api/repair-services/{id}</code> con información básica (sin steps ni replacementOptions)</li>
+<li><code>GET /api/repair-services/{id}/replacements</code> para obtener repuestos por dispositivo</li>
+<li><code>POST /api/repair-services/{id}/validate</code> para validar antes de agregar al carrito</li>
+</ul>
+</li>
+<li>
+<p><strong>Opcional</strong>:</p>
+<ul>
+<li><code>GET /api/repair-services</code> para el catálogo de servicios</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="estructura-de-carrito-para-servicios">Estructura de Carrito para Servicios</h2>
+<p>Cuando se agrega un servicio al carrito:</p>
+<pre><code class="language-typescript">{
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// ID único: &quot;service|serviceId|brandId|modelId|replacementId&quot;</span>
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;servicio&#x27;</span>; <span class="hljs-comment">// Tipo fijo</span>
+  <span class="hljs-attr">servicio</span>: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// Slug del servicio</span>
+  <span class="hljs-attr">nombre</span>: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// Nombre descriptivo completo</span>
+  <span class="hljs-attr">precio</span>: <span class="hljs-built_in">number</span>; <span class="hljs-comment">// Precio total (servicio + repuesto)</span>
+  <span class="hljs-attr">imagen</span>: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// Imagen del repuesto seleccionado</span>
+  <span class="hljs-attr">cantidad</span>: <span class="hljs-number">1</span>; <span class="hljs-comment">// Siempre 1 (no se permite cambiar)</span>
+
+  <span class="hljs-attr">options</span>: {
+    <span class="hljs-attr">service</span>: {
+      <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+      <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+      <span class="hljs-attr">basePrice</span>: <span class="hljs-built_in">number</span>;
+    }
+    <span class="hljs-attr">device</span>: {
+      <span class="hljs-attr">brandId</span>: <span class="hljs-built_in">string</span>;
+      <span class="hljs-attr">brandName</span>: <span class="hljs-built_in">string</span>;
+      <span class="hljs-attr">modelId</span>: <span class="hljs-built_in">string</span>;
+      <span class="hljs-attr">modelName</span>: <span class="hljs-built_in">string</span>;
+    }
+    <span class="hljs-attr">replacement</span>: {
+      <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+      <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+      <span class="hljs-attr">qualityLevel</span>: <span class="hljs-built_in">string</span>;
+      <span class="hljs-attr">price</span>: <span class="hljs-built_in">number</span>;
+      <span class="hljs-attr">warrantyDays</span>: <span class="hljs-built_in">number</span>;
+    }
+  }
+}
+</code></pre>
+<p><strong>Importante</strong>:</p>
+<ul>
+<li>El campo <code>options.accessories</code> NO existe en servicios (solo en productos)</li>
+<li>El <code>type</code> debe ser exactamente <code>'servicio'</code> para identificarlo en el carrito</li>
+<li>La imagen debe ser la del repuesto, no del servicio</li>
+</ul>
+<hr>
+<h2 id="diferencias-con-productos">Diferencias con Productos</h2>
+<table>
+<thead>
+<tr>
+<th>Aspecto</th>
+<th>Productos</th>
+<th>Servicios</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cantidad</td>
+<td>Variable (1-99)</td>
+<td>Siempre 1</td>
+</tr>
+<tr>
+<td>Precio</td>
+<td>Fijo por variante</td>
+<td>Base + Repuesto</td>
+</tr>
+<tr>
+<td>Stock</td>
+<td>Por variante</td>
+<td>Por repuesto</td>
+</tr>
+<tr>
+<td>Accesorios</td>
+<td>Sí</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Colores</td>
+<td>Sí</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Garantía</td>
+<td>Por producto</td>
+<td>Por servicio + repuesto</td>
+</tr>
+<tr>
+<td>Envío</td>
+<td>Sí</td>
+<td>No (se agenda)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="preguntas-frecuentes">Preguntas Frecuentes</h2>
+<p><strong>¿Por qué separar el precio base y el del repuesto?</strong></p>
+<ul>
+<li>Permite flexibilidad en precios sin replicar servicios</li>
+<li>Facilita actualizaciones de precios independientes</li>
+<li>Usuario ve desglose transparente</li>
+</ul>
+<p><strong>¿Qué pasa si no hay repuestos disponibles para un dispositivo?</strong></p>
+<ul>
+<li>El servicio sigue apareciendo</li>
+<li>Al seleccionar el dispositivo, se muestra mensaje: &quot;No hay repuestos disponibles para este modelo&quot;</li>
+<li>El botón de continuar se deshabilita</li>
+</ul>
+<p><strong>¿Cómo se agrega stock de repuestos?</strong></p>
+<ul>
+<li>Cada <code>ReplacementOption</code> debe tener un campo <code>stock</code> en la base de datos</li>
+<li>Validar stock antes de confirmar la reparación</li>
+<li>Restar del stock al confirmar el servicio</li>
+</ul>
+<p><strong>¿Se pueden combinar múltiples servicios?</strong></p>
+<ul>
+<li>Sí, cada servicio es un item independiente en el carrito</li>
+<li>Usuario puede agregar &quot;Cambio de pantalla&quot; + &quot;Cambio de batería&quot; para el mismo dispositivo</li>
+</ul>
+<p><strong>¿Cómo se maneja la agenda de reparación?</strong></p>
+<ul>
+<li>Eso es parte del proceso de checkout/pago (no documentado aquí)</li>
+<li>Después del pago, se solicita fecha y método de entrega</li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

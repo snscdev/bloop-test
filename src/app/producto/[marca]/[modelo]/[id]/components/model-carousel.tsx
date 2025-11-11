@@ -66,6 +66,7 @@ export function ModelCarousel({
                 onMouseEnter={() => onHoverModel(model.id)}
                 onMouseLeave={() => onHoverModel(null)}
                 formatPrice={formatPrice}
+                isLoaded={isLoaded}
               />
             </Box>
           ))}

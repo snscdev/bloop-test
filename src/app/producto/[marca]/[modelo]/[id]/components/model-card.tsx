@@ -31,6 +31,7 @@ type ModelCardProps = {
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   formatPrice: (price: number) => string;
+  isLoaded?: boolean;
 };
 
 export function ModelCard({
@@ -41,6 +42,7 @@ export function ModelCard({
   onMouseEnter,
   onMouseLeave,
   formatPrice,
+  isLoaded = true,
 }: ModelCardProps) {
   const [imageSrc, setImageSrc] = useState(model.image || '/assets/background/cards/modelo.png');
 
@@ -107,6 +109,7 @@ export function ModelCard({
             transform: 'translateX(-50%)',
             zIndex: 0,
             transition: 'transform 0.3s ease-in-out',
+            filter: isLoaded ? 'none' : 'grayscale(100%) brightness(1.1)',
           }}
         />
 

@@ -14,6 +14,7 @@ type AccessorySectionProps = {
   onToggle: () => void;
   onColorSelect: (colorId: string) => void;
   formatPrice: (price: number) => string;
+  isLoaded?: boolean;
 };
 
 export function AccessorySection({
@@ -23,6 +24,7 @@ export function AccessorySection({
   onToggle,
   onColorSelect,
   formatPrice,
+  isLoaded = true,
 }: AccessorySectionProps) {
   return (
     <Box
@@ -50,6 +52,7 @@ export function AccessorySection({
           availableColors={accessory.availableColors}
           selectedColorId={selectedColorId}
           onColorSelect={onColorSelect}
+          isLoaded={isLoaded}
         />
       </Box>
     </Box>

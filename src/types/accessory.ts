@@ -16,6 +16,7 @@ export type AccessoryColorOption = {
 export type AccessoryVariant = {
   id: string;
   colorId: string;
+  modelId?: string;
   images: AccessoryImage[];
   price: number;
   stock: number;
@@ -35,12 +36,34 @@ export type AccessoryBrandOption = {
   models: AccessoryModelOption[];
 };
 
+export type AccessoryBrandVariant = {
+  brandId: string;
+  brandName: string;
+  brandSlug: string;
+  models: AccessoryModelOption[];
+  colorOptions: AccessoryColorOption[];
+  variants: AccessoryVariant[];
+  gallery: AccessoryImage[];
+  price: number;
+  heroImage: AccessoryImage;
+};
+
 export type Accessory = {
   id: string;
   name: string;
   slug: string;
   shortDescription: string;
   description: string;
+  currency: string;
+  brandVariants: AccessoryBrandVariant[];
+  compatibility: string[];
+  highlights: string[];
+};
+
+export type AccessorySummary = {
+  id: string;
+  name: string;
+  slug: string;
   price: number;
   currency: string;
   brand: {
@@ -53,18 +76,7 @@ export type Accessory = {
     name: string;
     slug: string;
   };
-  brandOptions: AccessoryBrandOption[];
-  colorOptions: AccessoryColorOption[];
-  variants: AccessoryVariant[];
   heroImage: AccessoryImage;
-  gallery: AccessoryImage[];
-  compatibility: string[];
-  highlights: string[];
 };
-
-export type AccessorySummary = Pick<
-  Accessory,
-  'id' | 'name' | 'slug' | 'price' | 'currency' | 'brand' | 'model' | 'heroImage'
->;
 
 

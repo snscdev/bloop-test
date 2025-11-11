@@ -1,0 +1,453 @@
+================================================================================
+API DOCUMENTATION - SISTEMA DE SERVICIOS DE REPARACIÓN
+================================================================================
+
+CONTEXTO
+========
+
+El sistema de servicios técnicos permite a los usuarios:
+
+1. Seleccionar su dispositivo: Marca y modelo específico
+2. Elegir calidad del repuesto: Original, Premium o Económica (según 
+   disponibilidad para su dispositivo)
+3. Ver precio total: Servicio base + costo del repuesto
+4. Agendar reparación: Agregar al carrito y completar el proceso
+
+Características Clave:
+• Disponibilidad dinámica: Los repuestos varían según marca y modelo del 
+  dispositivo
+• Precio base fijo: Cada servicio tiene un precio base (ej: $79.99 MXN)
+• Precio del repuesto: Se suma al precio base según la calidad elegida
+• Garantías variables: Cada calidad de repuesto tiene diferente garantía 
+  (30, 60 o 90 días)
+
+
+================================================================================
+ENDPOINTS REQUERIDOS
+================================================================================
+
+1. OBTENER SERVICIO DE REPARACIÓN POR ID
+-----------------------------------------
+
+Obtiene la información completa de un servicio de reparación con todas las 
+opciones disponibles.
+
+Endpoint:
+GET /api/repair-services/{serviceId}
+
+Parámetros:
+• serviceId (string, path): ID único del servicio (ej: "screen-replacement", 
+  "battery-replacement")
+
+Query Parameters (opcional):
+• serviceSlug (string): Slug del servicio para contexto adicional
+
+Respuesta exitosa (200):
+
+{
+  id: string;                          // ID único del servicio
+  name: string;                        // Nombre del servicio (ej: "Cambio de pantalla")
+  slug: string;                        // Slug para URL (ej: "screen-replacement")
+  description: string;                 // Descripción del servicio
+  basePrice: number;                   // Precio base del servicio en centavos (ej: 7999 = $79.99)
+  currency: string;                    // Moneda (ej: "MXN")
+  category: string;                    // Categoría (ej: "screen", "battery", "camera")
+  estimatedTime: string;               // Tiempo estimado (ej: "2-3 horas", "24 horas")
+  warrantyDays: number;                // Días de garantía del servicio base
+  
+  supportedBrands: DeviceBrand[];      // Marcas de dispositivos compatibles con sus modelos
+  
+  gallery: string[];                   // Imágenes del servicio
+  highlights: string[];                // Puntos destacados
+  termsAndConditions: string;          // Términos y condiciones del servicio
+}
+
+Ejemplo de respuesta:
+
+{
+  "id": "screen-replacement",
+  "name": "Cambio de pantalla",
+  "slug": "cambio-de-pantalla",
+  "description": "Reemplazo completo de la pantalla de tu dispositivo con repuestos de alta calidad. Incluye limpieza interna y pruebas de funcionamiento.",
+  "basePrice": 7999,
+  "currency": "MXN",
+  "category": "screen",
+  "estimatedTime": "2-3 horas",
+  "warrantyDays": 90,
+  
+  "supportedBrands": [
+    {
+      "id": "apple",
+      "name": "Apple",
+      "slug": "apple",
+      "iconUrl": "https://cdn.bloop.com/brands/apple.svg",
+      "models": [
+        {
+          "id": "iphone-15-pro-max",
+          "name": "iPhone 15 Pro Max",
+          "slug": "iphone-15-pro-max",
+          "releaseYear": 2023,
+          "imageUrl": "https://cdn.bloop.com/devices/iphone-15-pro-max.png"
+        },
+        {
+          "id": "iphone-15-plus",
+          "name": "iPhone 15 Plus",
+          "slug": "iphone-15-plus",
+          "releaseYear": 2023,
+          "imageUrl": "https://cdn.bloop.com/devices/iphone-15-plus.png"
+        },
+        {
+          "id": "iphone-14",
+          "name": "iPhone 14",
+          "slug": "iphone-14",
+          "releaseYear": 2022,
+          "imageUrl": "https://cdn.bloop.com/devices/iphone-14.png"
+        }
+      ]
+    },
+    {
+      "id": "samsung",
+      "name": "Samsung",
+      "slug": "samsung",
+      "iconUrl": "https://cdn.bloop.com/brands/samsung.svg",
+      "models": [
+        {
+          "id": "galaxy-s24-plus",
+          "name": "Galaxy S24 Plus",
+          "slug": "galaxy-s24-plus",
+          "releaseYear": 2024,
+          "imageUrl": "https://cdn.bloop.com/devices/galaxy-s24-plus.png"
+        },
+        {
+          "id": "galaxy-s24-ultra",
+          "name": "Galaxy S24 Ultra",
+          "slug": "galaxy-s24-ultra",
+          "releaseYear": 2024,
+          "imageUrl": "https://cdn.bloop.com/devices/galaxy-s24-ultra.png"
+        },
+        {
+          "id": "galaxy-z-flip-5",
+          "name": "Galaxy Z Flip 5",
+          "slug": "galaxy-z-flip-5",
+          "releaseYear": 2023,
+          "imageUrl": "https://cdn.bloop.com/devices/galaxy-z-flip-5.png"
+        }
+      ]
+    },
+    {
+      "id": "google",
+      "name": "Google",
+      "slug": "google",
+      "iconUrl": "https://cdn.bloop.com/brands/google.svg",
+      "models": [
+        {
+          "id": "pixel-8-pro",
+          "name": "Pixel 8 Pro",
+          "slug": "pixel-8-pro",
+          "releaseYear": 2023,
+          "imageUrl": "https://cdn.bloop.com/devices/pixel-8-pro.png"
+        },
+        {
+          "id": "pixel-7a",
+          "name": "Pixel 7a",
+          "slug": "pixel-7a",
+          "releaseYear": 2023,
+          "imageUrl": "https://cdn.bloop.com/devices/pixel-7a.png"
+        }
+      ]
+    }
+  ],
+  
+  "gallery": [
+    "https://cdn.bloop.com/services/screen-replacement-1.jpg",
+    "https://cdn.bloop.com/services/screen-replacement-2.jpg",
+    "https://cdn.bloop.com/services/screen-replacement-3.jpg",
+    "https://cdn.bloop.com/services/screen-replacement-4.jpg"
+  ],
+  
+  "highlights": [
+    "Técnicos certificados con más de 5 años de experiencia",
+    "Proceso de reparación en ambiente controlado",
+    "Pruebas exhaustivas antes de entrega",
+    "Garantía extendida disponible"
+  ],
+  
+  "termsAndConditions": "El servicio incluye mano de obra y limpieza interna. La garantía cubre defectos de fabricación del repuesto instalado. No cubre daños causados por mal uso o golpes posteriores..."
+}
+
+Errores:
+• 404 Not Found: Servicio no encontrado
+• 500 Internal Server Error: Error del servidor
+
+
+2. OBTENER REPUESTOS DISPONIBLES PARA DISPOSITIVO
+--------------------------------------------------
+
+Obtiene solo los repuestos compatibles con un dispositivo específico. Este 
+endpoint se llama cuando el usuario selecciona marca y modelo.
+
+Endpoint:
+GET /api/repair-services/{serviceId}/replacements
+
+Parámetros:
+• serviceId (string, path): ID del servicio
+
+Query Parameters:
+• brandId (string, required): ID de la marca del dispositivo
+• modelId (string, required): ID del modelo del dispositivo
+
+Respuesta exitosa (200):
+
+{
+  availableReplacements: ReplacementOption[];
+  recommendedReplacementId: string | null;
+}
+
+Ejemplo de request:
+GET /api/repair-services/screen-replacement/replacements?brandId=apple&modelId=iphone-15-pro-max
+
+Ejemplo de respuesta:
+
+{
+  "availableReplacements": [
+    {
+      "id": "original",
+      "name": "Pantalla original",
+      "qualityLevel": "original",
+      "price": 14999,
+      "description": "Repuesto certificado por el fabricante con calibración original.",
+      "imageUrl": "https://cdn.bloop.com/replacements/original-screen.jpg",
+      "benefits": ["100% original", "True Tone compatible", "Garantía 90 días"],
+      "warrantyDays": 90,
+      "isRecommended": true
+    }
+  ],
+  "recommendedReplacementId": "original"
+}
+
+Errores:
+• 404 Not Found: Servicio no encontrado
+• 400 Bad Request: Parámetros inválidos o faltantes
+• 200 OK + Empty Array: No hay repuestos disponibles para ese dispositivo
+• 500 Internal Server Error: Error del servidor
+
+
+3. LISTAR SERVICIOS DE REPARACIÓN
+----------------------------------
+
+Obtiene una lista de todos los servicios de reparación disponibles.
+
+Endpoint:
+GET /api/repair-services
+
+Query Parameters (opcional):
+• category (string): Filtrar por categoría (ej: "screen", "battery", "camera")
+• brandId (string): Filtrar por marca compatible
+• modelId (string): Filtrar por modelo compatible
+• page (number): Número de página (default: 1)
+• limit (number): Items por página (default: 20)
+
+Respuesta exitosa (200):
+
+{
+  services: RepairServiceSummary[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+type RepairServiceSummary = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  basePrice: number;
+  currency: string;
+  category: string;
+  estimatedTime: string;
+  iconUrl: string;
+  thumbnailUrl: string;
+}
+
+Ejemplo de respuesta:
+
+{
+  "services": [
+    {
+      "id": "screen-replacement",
+      "name": "Cambio de pantalla",
+      "slug": "cambio-de-pantalla",
+      "description": "Reemplazo completo de la pantalla de tu dispositivo",
+      "basePrice": 7999,
+      "currency": "MXN",
+      "category": "screen",
+      "estimatedTime": "2-3 horas",
+      "iconUrl": "https://cdn.bloop.com/icons/screen.svg",
+      "thumbnailUrl": "https://cdn.bloop.com/services/screen-thumb.jpg"
+    },
+    {
+      "id": "battery-replacement",
+      "name": "Cambio de batería",
+      "slug": "cambio-de-bateria",
+      "description": "Reemplazo de batería con repuesto de alta capacidad",
+      "basePrice": 5999,
+      "currency": "MXN",
+      "category": "battery",
+      "estimatedTime": "1-2 horas",
+      "iconUrl": "https://cdn.bloop.com/icons/battery.svg",
+      "thumbnailUrl": "https://cdn.bloop.com/services/battery-thumb.jpg"
+    }
+  ],
+  "total": 2,
+  "page": 1,
+  "limit": 20
+}
+
+
+4. VALIDAR DISPONIBILIDAD DE SERVICIO
+--------------------------------------
+
+Valida si un servicio específico está disponible para un dispositivo antes de 
+agregar al carrito.
+
+Endpoint:
+POST /api/repair-services/{serviceId}/validate
+
+Parámetros:
+• serviceId (string, path): ID del servicio
+
+Body:
+
+{
+  brandId: string;
+  modelId: string;
+  replacementId: string;
+}
+
+Ejemplo de request:
+
+{
+  "brandId": "apple",
+  "modelId": "iphone-15-pro-max",
+  "replacementId": "original"
+}
+
+Respuesta exitosa (200):
+
+{
+  available: boolean;
+  servicePrice: number;               // Precio base del servicio
+  replacementPrice: number;           // Precio del repuesto
+  totalPrice: number;                 // Suma total
+  currency: string;
+  estimatedTime: string;
+  warrantyDays: number;               // Días de garantía del repuesto
+  message?: string;                   // Mensaje si no está disponible
+}
+
+Ejemplo de respuesta (disponible):
+
+{
+  "available": true,
+  "servicePrice": 7999,
+  "replacementPrice": 14999,
+  "totalPrice": 22998,
+  "currency": "MXN",
+  "estimatedTime": "2-3 horas",
+  "warrantyDays": 90
+}
+
+Ejemplo de respuesta (no disponible):
+
+{
+  "available": false,
+  "servicePrice": 7999,
+  "replacementPrice": 0,
+  "totalPrice": 0,
+  "currency": "MXN",
+  "estimatedTime": "2-3 horas",
+  "warrantyDays": 0,
+  "message": "El repuesto seleccionado no está disponible para este modelo"
+}
+
+Errores:
+• 404 Not Found: Servicio, marca, modelo o repuesto no encontrado
+• 400 Bad Request: Datos inválidos
+• 500 Internal Server Error: Error del servidor
+
+
+================================================================================
+TIPOS DE DATOS (TYPESCRIPT)
+================================================================================
+
+// Modelo de dispositivo
+type DeviceModel = {
+  id: string;
+  name: string;
+  slug: string;
+  releaseYear: number;
+  imageUrl?: string;
+};
+
+// Marca de dispositivo con sus modelos
+type DeviceBrand = {
+  id: string;
+  name: string;
+  slug: string;
+  iconUrl?: string;
+  models: DeviceModel[];
+};
+
+// Disponibilidad del repuesto
+type ReplacementAvailability = {
+  brands: string[]; // IDs de marcas compatibles
+  models: string[]; // IDs de modelos compatibles
+};
+
+// Opción de repuesto
+type ReplacementOption = {
+  id: string;
+  name: string;
+  qualityLevel: 'original' | 'premium' | 'economy';
+  price: number; // Precio en centavos
+  description: string;
+  imageUrl: string;
+  benefits: string[]; // Lista de beneficios
+  warrantyDays: number; // Días de garantía del repuesto
+  isRecommended: boolean;
+  availability: ReplacementAvailability;
+};
+
+// Servicio de reparación completo (usado por endpoint GET /api/repair-services/{id})
+type RepairService = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  basePrice: number; // Precio base en centavos
+  currency: string;
+  category: string;
+  estimatedTime: string;
+  warrantyDays: number; // Garantía del servicio base
+ 
+  supportedBrands: DeviceBrand[]; // Marcas y modelos compatibles
+ 
+  gallery: string[];
+  highlights: string[];
+  termsAndConditions: string;
+};
+
+// Resumen de servicio para listados
+type RepairServiceSummary = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  basePrice: number;
+  currency: string;
+  category: string;
+  estimatedTime: string;
+  iconUrl: string;
+  thumbnailUrl: string;
+};
+

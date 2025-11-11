@@ -63,6 +63,7 @@ export function ColorCarousel({
                 onClick={() => onSelectColor(color.id)}
                 onMouseEnter={() => onHoverColor(color.id)}
                 onMouseLeave={() => onHoverColor(null)}
+                isLoaded={isLoaded}
               />
             </Box>
           ))}

@@ -5,6 +5,7 @@ import type { AccessoryImage } from 'src/types/accessory';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { alpha } from '@mui/material/styles';
+import Skeleton from '@mui/material/Skeleton';
 import ButtonBase from '@mui/material/ButtonBase';
 import IconButton from '@mui/material/IconButton';
 
@@ -16,9 +17,15 @@ type AccessoryGalleryProps = {
   images: AccessoryImage[];
   activeIndex: number;
   onChange: (index: number) => void;
+  isLoading?: boolean;
 };
 
-export function AccessoryGallery({ images, activeIndex, onChange }: AccessoryGalleryProps) {
+export function AccessoryGallery({
+  images,
+  activeIndex,
+  onChange,
+  isLoading = false,
+}: AccessoryGalleryProps) {
   const total = images.length;
   const hasMultipleImages = total > 1;
 
@@ -39,6 +46,34 @@ export function AccessoryGallery({ images, activeIndex, onChange }: AccessoryGal
   };
 
   const activeImage = images[activeIndex] ?? images[0];
+
+  if (isLoading) {
+    return (
+      <Stack spacing={3} sx={{ width: '100%' }}>
+        <Skeleton
+          variant="rectangular"
+          sx={{
+            width: '100%',
+            pt: { xs: '75%', md: '80%' },
+            borderRadius: 5,
+          }}
+        />
+        <Stack direction="row" spacing={2}>
+          {[1, 2, 3, 4].map((index) => (
+            <Skeleton
+              key={index}
+              variant="rectangular"
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: 3,
+              }}
+            />
+          ))}
+        </Stack>
+      </Stack>
+    );
+  }
 
   return (
     <Stack spacing={3} sx={{ width: '100%' }}>

@@ -19,6 +19,7 @@ interface ColorCardProps {
   onClick: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  isLoaded?: boolean;
 }
 
 // ============================================================================
@@ -89,6 +90,7 @@ export function ColorCard({
   onClick,
   onMouseEnter,
   onMouseLeave,
+  isLoaded = true,
 }: ColorCardProps) {
   const gradientStops = useMemo(() => parseGradientStops(color.gradient), [color.gradient]);
 
