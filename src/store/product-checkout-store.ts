@@ -571,7 +571,7 @@ export const useProductCheckoutStore = create<ProductCheckoutState>((set, get) =
       ],
       locationId,
       amount: itemPrice * quantity,
-      currency: 'ARS',
+      currency: 'MXN',
       productName: product.modelo,
       successUrl,
       cancelUrl,

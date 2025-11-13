@@ -65,11 +65,12 @@ export function NavMobile({ onClose }: NavMobileProps) {
 
       const origin = window.location.origin;
       const paymentUrl = await createPaymentSession({
-        successUrl: `https://bloop-test.vercel.app`, //`${origin}/success`,
-        cancelUrl: `https://bloop-test.vercel.app`, //`${origin}/cancel`,
+        successUrl: `${origin}/success`,
+        cancelUrl: `${origin}/cancel`,
       });
 
-      window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+      // window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+      window.location.href = paymentUrl;
       onClose();
     } catch (error) {
       const message =

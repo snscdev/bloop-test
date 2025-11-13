@@ -142,12 +142,8 @@ export default function CartPage() {
       }
 
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const successUrl = origin
-        ? 'https://bloop-test.vercel.app/checkout/success'
-        : `${origin}/success`;
-      const cancelUrl = origin
-        ? 'https://bloop-test.vercel.app/checkout/cancel'
-        : `${origin}/cancel`;
+      const successUrl = `${origin}/success`;
+      const cancelUrl = `${origin}/cancel`;
 
       const paymentSession = await createPaymentSession({
         items: sessionItems,
@@ -167,7 +163,7 @@ export default function CartPage() {
       }
 
       if (typeof window !== 'undefined') {
-        window.open(paymentSession.paymentUrl, '_blank', 'noopener,noreferrer');
+        window.location.href = paymentSession.paymentUrl;
       }
     } catch (error) {
       const message =

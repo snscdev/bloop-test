@@ -58,11 +58,12 @@ export function ProductStickyNavbar({ isVisible, sx }: Props) {
 
       const origin = window.location.origin;
       const paymentUrl = await createPaymentSession({
-        successUrl: `https://bloop-test.vercel.app`, //`${origin}/success`,
-        cancelUrl: `https://bloop-test.vercel.app`, //`${origin}/cancel`,
+        successUrl: `${origin}/success`,
+        cancelUrl: `${origin}/cancel`,
       });
 
-      window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+      // window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+      window.location.href = paymentUrl;
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Ocurrió un error al procesar el pago.';

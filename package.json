@@ -1,8 +1,8 @@
 {
-  "name": "@minimal-kit/next-ts",
-  "author": "Minimals",
-  "version": "7.4.0",
-  "description": "Next & TypeScript",
+  "name": "bloop-web",
+  "author": "Nicole Stephanie",
+  "version": "1.0.0",
+  "description": "Bloop Web",
   "private": true,
   "scripts": {
     "dev": "next dev -p 8084 --turbopack",
