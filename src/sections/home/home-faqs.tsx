@@ -218,7 +218,6 @@ export function HomeFAQs({ sx, ...other }: BoxProps) {
         <Button
           color="inherit"
           variant="contained"
-          href="mailto:support@minimals.cc?subject=[Feedback] from Customer"
           startIcon={<Iconify icon="solar:letter-bold" />}
         >
           Contact us
